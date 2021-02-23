@@ -1,10 +1,18 @@
 import javax.swing.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
+import javax.swing.JMenu;
 
 /**
  * Project Introduction
@@ -13,22 +21,29 @@ Do you miss going to University Campus? Here is a program that let's you simulat
 */
 
 /***
- * Student class. This is the class that represents the user, which is presumably a student at SJSU 
+ * Student class. This is the class that represents the user, which is presumably a student at SJSU
  */
 class Student extends JComponent {
-    LinkedList<String> books;
+    private String name;
+    private LinkedList<String> books;
     private double money; //Money to purchase things from the bookstore or cafeteria.
     private LinkedList<String> homework;
-    private String diary; // What the student has done today.
+    private LinkedList<String> diary; // What the student has done today.
 
     public void addBooks(String books){
         this.books.add(books);
     }
 
+    public void writeDiary(String diaryEntry){
+        this.diary.add(diaryEntry);
+    }
+
 }
 
 /**
- *
+ * Sources
+ * For Date: https://www.javatpoint.com/java-get-current-date
+ * For BufferedWriter: https://www.baeldung.com/java-write-to-file
  */
 class UniversityCampusFrame extends JFrame {
     private static final int FRAME_WIDTH = 1200;
@@ -39,6 +54,9 @@ class UniversityCampusFrame extends JFrame {
     private JPanel UniversityCampus;
     private CardLayout card = new CardLayout();
     private JTextArea resultArea;
+    private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+    private LocalDateTime now = LocalDateTime.now();
+    private String saveFileName = "savefile.txt";
 
     Student student;
     Classroom classroom;
@@ -48,7 +66,7 @@ class UniversityCampusFrame extends JFrame {
     Cafeteria cafeteria;
 
     /***
-     * TODO: add a time and date system. That is, everytime a student goes somewhere,
+     * TODO: add a time and date system. That is, everytime a student goes somewhere, time increaseses
      */
     public UniversityCampusFrame(){
         //JOptionPane.showMessageDialog(null, "Welcome to the University!");
@@ -86,6 +104,9 @@ class UniversityCampusFrame extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
         menuBar.add(createNavigationMenu());
+        menuBar.add(createStatusMenu());
+        menuBar.add(createFileMenu());
+
         add(UniversityCampus);
         add(subPanel, BorderLayout.SOUTH);
 
@@ -104,6 +125,25 @@ class UniversityCampusFrame extends JFrame {
             return menu;
         }
 
+        public JMenu createStatusMenu()
+        {
+            JMenu menu = new JMenu("Status");
+            menu.add(createStatusItem("Name"));
+            menu.add(createStatusItem("Wallet"));
+            menu.add(createStatusItem("Homeworks"));
+            menu.add(createStatusItem("Books"));
+            menu.add(createStatusItem("Diary"));
+            return menu;
+        }
+
+        public JMenu createFileMenu(){
+            JMenu menu = new JMenu("File");
+            menu.add(createFileItem("Save"));
+            menu.add(createFileItem("Load"));
+            return menu;
+
+        }
+
     public JMenuItem createNavigationItem(final String name)
     {
         class NavigationItemListener implements ActionListener{
@@ -111,23 +151,24 @@ class UniversityCampusFrame extends JFrame {
             {
                 CardLayout cl = (CardLayout) (UniversityCampus.getLayout());
                 if(name == "Campus"){
-                    resultArea.append("You went to the main campus");
+                    resultArea.append(dtf.format(now) + " You went to the main campus." + "\n");
                     cl.show(UniversityCampus, "campus");
                 }
                 if(name == "Classroom") {
-                    resultArea.append("You went to the classroom." + "\n");
+                    resultArea.append(dtf.format(now) + " You went to the classroom." + "\n");
                     cl.show(UniversityCampus,"classroom");
+                    //student.
                 }
                 if(name == "Cafeteria") {
-                    resultArea.append("You went to the cafeteria." + "\n");
+                    resultArea.append(dtf.format(now) + " You went to the cafeteria." + "\n");
                     cl.show(UniversityCampus,"cafeteria");
                 }
                 if(name == "Library") {
-                    resultArea.append("You went to the library." + "\n");
+                    resultArea.append(dtf.format(now) + " You went to the library." + "\n");
                     cl.show(UniversityCampus,"library");
                 }
                 if(name == "Bookstore") {
-                    resultArea.append("You went to the bookstore." + "\n");
+                    resultArea.append(dtf.format(now) + " You went to the bookstore." + "\n");
                     cl.show(UniversityCampus,"bookstore");
                 }
             }
@@ -139,10 +180,35 @@ class UniversityCampusFrame extends JFrame {
         return item;
     }
 
-    class ChoiceListener implements ActionListener{
-        public void actionPerformed(ActionEvent event){
+    public JMenuItem createStatusItem(final String name){
+        class StatusItemListener implements ActionListener{
+            public void actionPerformed(ActionEvent event){
 
+            }
         }
+        JMenuItem item = new JMenuItem(name);
+        ActionListener listener = new StatusItemListener();
+        item.addActionListener(listener);
+        return item;
+    }
+
+    public JMenuItem createFileItem(final String name){
+        class FileItemListener implements ActionListener{
+            public void actionPerformed(ActionEvent event){
+                if(name == "Save"){
+                    try {
+                        save(saveFileName);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    resultArea.append("Saved");
+                }
+            }
+        }
+        JMenuItem item = new JMenuItem(name);
+        ActionListener listener = new FileItemListener();
+        item.addActionListener(listener);
+        return item;
     }
 
     //Functions to be implemented
@@ -153,7 +219,12 @@ class UniversityCampusFrame extends JFrame {
      * This function will write to the savefile, which is a text file, and input everything that
      * the student has done today and what
      */
-    public void save(){ }
+    public void save(String filename) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+        writer.append(resultArea.getText());
+        writer.close();
+        System.out.println(resultArea.getText());
+    }
 
     public void load(){ }
 }
@@ -247,7 +318,17 @@ class BookStore extends JComponent {
 
     private LinkedList<String> Items;
 
+    public BookStore(){
+
+
+    }
+
     public void paintComponent (Graphics g){}
+
+    public JMenu createPurchaseMenu(){
+        JMenu menu = new JMenu("Purchase");
+        return menu;
+    }
 }
 
 /**
