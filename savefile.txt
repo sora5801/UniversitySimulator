@@ -1,4 +1,7 @@
 Welcome to the University!
-2021/02/23 00:56:53 You went to the classroom.
-2021/02/23 00:56:53 You went to the cafeteria.
-2021/02/23 00:56:53 You went to the library.
+2021/02/27 15:37:34 You went to the cafeteria.
+2021/02/27 15:37:34 You went to the main campus.
+2021/02/27 15:37:34 You went to the cafeteria.
+2021/02/27 15:37:34 You went to the library.
+2021/02/27 15:37:34 You went to the cafeteria.
+2021/02/27 15:37:34 You went to the bookstore.

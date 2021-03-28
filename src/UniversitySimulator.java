@@ -11,6 +11,8 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import javax.swing.JMenu;
 
@@ -29,6 +31,16 @@ class Student extends JComponent {
     private double money; //Money to purchase things from the bookstore or cafeteria.
     private LinkedList<String> homework;
     private LinkedList<String> diary; // What the student has done today.
+
+    public Student(String name){
+        this.name = name;
+        this.money = 250;
+    }
+
+    public String getName(){ return this.name; }
+    public double getWallet(){ return this.money;}
+
+    public void spendMoney(double money){this.money -= money;}
 
     public void addBooks(String books){
         this.books.add(books);
@@ -70,7 +82,7 @@ class UniversityCampusFrame extends JFrame {
      */
     public UniversityCampusFrame(){
         //JOptionPane.showMessageDialog(null, "Welcome to the University!");
-        student = new Student();
+        student = new Student("Jane");
 
         card = new CardLayout();
 
@@ -79,6 +91,7 @@ class UniversityCampusFrame extends JFrame {
 
         resultArea = new JTextArea();
         resultArea.setEditable(false);
+        resultArea.setFont(new Font("monospaced", Font.PLAIN, 12));
         resultArea.setText("Welcome to the University!" + "\n");
 
         JScrollPane scrollPane = new JScrollPane(resultArea);
@@ -94,6 +107,8 @@ class UniversityCampusFrame extends JFrame {
         classroom = new Classroom();
         bookstore = new BookStore();
         cafeteria = new Cafeteria();
+        JButton button2 = new JButton("User option");
+        cafeteria.add(button2);
 
         UniversityCampus.add(campus, "campus");
         UniversityCampus.add(classroom, "classroom");
@@ -111,6 +126,11 @@ class UniversityCampusFrame extends JFrame {
         add(subPanel, BorderLayout.SOUTH);
 
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
+    }
+
+    public void cafeteriaOperation(){
+        resultArea.append(cafeteria.cafeteriaUI() + "\n");
+        resultArea.append(cafeteria.displayMenu());
     }
 
 
@@ -162,6 +182,7 @@ class UniversityCampusFrame extends JFrame {
                 if(name == "Cafeteria") {
                     resultArea.append(dtf.format(now) + " You went to the cafeteria." + "\n");
                     cl.show(UniversityCampus,"cafeteria");
+                    cafeteriaOperation();
                 }
                 if(name == "Library") {
                     resultArea.append(dtf.format(now) + " You went to the library." + "\n");
@@ -183,7 +204,22 @@ class UniversityCampusFrame extends JFrame {
     public JMenuItem createStatusItem(final String name){
         class StatusItemListener implements ActionListener{
             public void actionPerformed(ActionEvent event){
-
+                CardLayout cl = (CardLayout) (UniversityCampus.getLayout());
+                if(name == "Name"){
+                    resultArea.append(" Your name is " + student.getName() + "\n");
+                }
+                if(name == "Wallet") {
+                    resultArea.append(" You have $" + student.getWallet() + "in your wallet." + "\n");
+                }
+                if(name == "Homeworks") {
+                    resultArea.append(" You went to the cafeteria." + "\n");
+                }
+                if(name == "Books") {
+                    resultArea.append(" You went to the library." + "\n");
+                }
+                if(name == "Diary") {
+                    resultArea.append(" You went to the bookstore." + "\n");
+                }
             }
         }
         JMenuItem item = new JMenuItem(name);
@@ -233,9 +269,13 @@ class UniversityCampusFrame extends JFrame {
  * TODO Create an abridged classroom system.
  * OPTIONAL TODO Add a test system based on how well the student did his or her homework.
  */
-class Classroom extends JComponent {
+class Classroom extends JPanel {
+    private String homework;
     public Classroom(){
 
+    }
+    public String giveHomework(){
+        return "";
     }
 
     /**
@@ -252,7 +292,7 @@ class Classroom extends JComponent {
  * This is the University Campus Frame
  * TODO Finish drawing a frame that depicts a topdown view of SJSU
  */
-class Campus extends JComponent{
+class Campus extends JPanel{
     private final int xCoord = 50; //Centered at 0,0
     private final int yCoord = 50;
     private int Width;
@@ -290,18 +330,152 @@ class Campus extends JComponent{
 /**
  * TODO Draw a frame that depicts the school cafeteria
  */
-class Cafeteria extends JComponent {
+class Cafeteria extends JPanel {
+    private HashMap<String, Double> menu = new HashMap<String, Double>();
+    private ArrayList<Integer> receipt = new ArrayList<Integer>();
+
     public void paintComponent (Graphics g){}
+
+    public Cafeteria(){
+        initializeMenu();
+    }
+
+    public String displayMenu(){
+        int count = 1;
+        final int dashedLines = 100;
+        final int spaces = 25;
+        String bars = "";
+        LinkedList<String> items = new LinkedList<>();
+        LinkedList<Double> price = new LinkedList<>();
+        LinkedList<Integer> number = new LinkedList<>();
+
+        bars = spacePad(bars, spaces);
+        bars = dashPad(bars, dashedLines);
+        bars+="\n";
+        bars = spacePad(bars, 3 * spaces);
+        bars += "Menu";
+        bars = spacePad(bars, spaces);
+        bars+="\n";
+        bars = spacePad(bars, spaces);
+        bars = dashPad(bars, dashedLines);
+        bars += "\n";
+        for(HashMap.Entry<String, Double> entry: menu.entrySet()){
+            items.add(entry.getKey());
+            price.add(entry.getValue());
+            number.add(count);
+            count++;
+        }
+
+        for(int i = 0; i < items.size(); i++){
+            bars += String.format("%25d. %5s", number.get(i), items.get(i));
+            int length = 120 - String.format("%25d. %s", number.get(i), items.get(i)).length();
+            bars = periodPad(bars, length);
+            bars += String.format("$%.2f%n", price.get(i));
+              }
+
+        bars = spacePad(bars, spaces);
+        bars = dashPad(bars, dashedLines);
+        bars += "\n";
+
+        return bars;
+    }
+
+    private String periodPad(String s, int n){
+        for (int i = 0; i < n; i++)
+            s += ".";
+        return s;
+    }
+
+    private String spacePad(String s, int n){
+        for (int i = 0; i < n; i++)
+            s += " ";
+        return s;
+    }
+
+    private String dashPad(String s, int n){
+        for (int i = 0; i < n; i++)
+            s += "-";
+        return s;
+    }
+
+    public void initializeMenu(){
+        menu.put("AppleWood Bacon and Black Olives Pizza", 7.50);
+        menu.put("Sliced Genoa Salami and Roasted Garlic Pizza", 7.00);
+        menu.put("New England Clam Chowder", 6.00);
+        menu.put("Pasta Primavera", 6.00);
+        menu.put("Spinach Ravioli with Pesto Sauce", 6.00);
+        menu.put("Pot Pie", 6.00);
+        menu.put("Lasagna", 6.50);
+        menu.put("Pesto Chicken & Bow Tie Pasta with Roasted Squash", 7.00);
+        menu.put("Chicken Tikka", 6.50);
+        menu.put("Spaghetti and MeatBalls", 6.50);
+        menu.put("Avocado Sandwich", 5.50);
+        menu.put("Cajun Chicken Benedict", 6.00);
+    }
+
+    public String cafeteriaUI(){
+        return "Welcome to the Cafeteria!";
+    }
+
+    public double sellFood(int i){
+        switch (i){
+            case 1:
+                return menu.get("AppleWood Bacon and Black Olives Pizza");
+            case 2:
+                return menu.get("Sliced Genoa Salami and Roasted Garlic Pizza");
+            case 3:
+                return menu.get("New England Clam Chowder");
+            case 4:
+                return menu.get("Pasta Primavera");
+            case 5:
+                return menu.get("Spinach Ravioli with Pesto Sauce");
+            case 6:
+                return menu.get("Pot Pie");
+            case 7:
+                return menu.get("Lasagna");
+            case 8:
+                return menu.get("Pesto Chicken & Bow Tie Pasta with Roasted Squash");
+            case 9:
+                return menu.get("Chicken Tikka");
+            case 10:
+                return menu.get("Spaghetti and MeatBalls");
+            case 11:
+                return menu.get("Avocado Sandwich");
+            case 12:
+                return menu.get("Cajun Chicken Benedict");
+
+        }
+        return 0;
+    }
+
+    public String printReceipt(){
+        return "";
+    }
+}
+
+class Book{
+    private int k;
+    private String l;
+    Book(int i, String s){
+        k = i;
+        l = s;
+    }
 }
 
 /**
  * TODO Draw a frame that depicts the Martin Luther King Jr. Library
  */
-class Library extends JComponent {
+class Library extends JPanel {
     private LinkedList<String> bookLists;
+    //private LinkedList<Book> bookLists = new LinkedList<Book>();
 
     public void displayBookLists(){
 
+    }
+
+    Library(){
+      //  Book b1 = new Book(100, "s");
+      //  bookLists.add(b1);
     }
 
     /**
@@ -314,7 +488,7 @@ class Library extends JComponent {
 /***
  * TODO Draw a frame that depicts the Bookstore
  */
-class BookStore extends JComponent {
+class BookStore extends JPanel {
 
     private LinkedList<String> Items;
 
