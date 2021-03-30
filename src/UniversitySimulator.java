@@ -39,6 +39,7 @@ class Student extends JComponent {
 
     public String getName(){ return this.name; }
     public double getWallet(){ return this.money;}
+    public void setWallet(double money){ this.money = money;}
 
     public void spendMoney(double money){this.money -= money;}
 
@@ -48,6 +49,12 @@ class Student extends JComponent {
 
     public void writeDiary(String diaryEntry){
         this.diary.add(diaryEntry);
+    }
+
+    public void interactWithCafeteria(Cafeteria cafeteria){
+        while(cafeteria.isDisplayable()){
+
+        }
     }
 
 }
@@ -69,6 +76,7 @@ class UniversityCampusFrame extends JFrame {
     private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     private LocalDateTime now = LocalDateTime.now();
     private String saveFileName = "savefile.txt";
+    private JTextField rateField;
 
     Student student;
     Classroom classroom;
@@ -107,8 +115,8 @@ class UniversityCampusFrame extends JFrame {
         classroom = new Classroom();
         bookstore = new BookStore();
         cafeteria = new Cafeteria();
-        JButton button2 = new JButton("User option");
-        cafeteria.add(button2);
+        //cafeteria.setLayout(new FlowLayout(FlowLayout.RIGHT));
+
 
         UniversityCampus.add(campus, "campus");
         UniversityCampus.add(classroom, "classroom");
@@ -129,8 +137,7 @@ class UniversityCampusFrame extends JFrame {
     }
 
     public void cafeteriaOperation(){
-        resultArea.append(cafeteria.cafeteriaUI() + "\n");
-        resultArea.append(cafeteria.displayMenu());
+
     }
 
 
@@ -182,7 +189,7 @@ class UniversityCampusFrame extends JFrame {
                 if(name == "Cafeteria") {
                     resultArea.append(dtf.format(now) + " You went to the cafeteria." + "\n");
                     cl.show(UniversityCampus,"cafeteria");
-                    cafeteriaOperation();
+                    cafeteria.getStudent(student);
                 }
                 if(name == "Library") {
                     resultArea.append(dtf.format(now) + " You went to the library." + "\n");
@@ -206,10 +213,10 @@ class UniversityCampusFrame extends JFrame {
             public void actionPerformed(ActionEvent event){
                 CardLayout cl = (CardLayout) (UniversityCampus.getLayout());
                 if(name == "Name"){
-                    resultArea.append(" Your name is " + student.getName() + "\n");
+                    resultArea.append("Your name is " + student.getName() + "\n");
                 }
                 if(name == "Wallet") {
-                    resultArea.append(" You have $" + student.getWallet() + "in your wallet." + "\n");
+                    resultArea.append("You have $" + student.getWallet() + " in your wallet." + "\n");
                 }
                 if(name == "Homeworks") {
                     resultArea.append(" You went to the cafeteria." + "\n");
@@ -331,19 +338,61 @@ class Campus extends JPanel{
  * TODO Draw a frame that depicts the school cafeteria
  */
 class Cafeteria extends JPanel {
-    private HashMap<String, Double> menu = new HashMap<String, Double>();
-    private ArrayList<Integer> receipt = new ArrayList<Integer>();
+    private static final int AREA_ROWS = 10;
+    private static final int AREA_COLUMNS = 30;
+    private HashMap<String, Double> menu = new HashMap<>();
+    private HashMap<Integer, String> menuItems = new HashMap<>();
+    private HashMap<Integer, Integer> menuCount = new HashMap<>();
+    private HashMap<Integer, Boolean> isOnReceipt = new HashMap<>();
+    private ArrayList<Integer> receipt = new ArrayList<>();
+    private JTextField rateField;
+    private JTextArea menuOptions;
+    private double orders;
+    private JTextArea textArea = new JTextArea();
+    private JTextArea receiptArea = new JTextArea();
+    private int itemAmount = 0;
+    private JRadioButton radio1;
+    private JRadioButton radio2;
+    private String lastOrder;
+    private Student student;
+    ButtonGroup buttonGroup;
 
     public void paintComponent (Graphics g){}
 
+    public void getStudent(Student student){
+        this.student = student;
+    }
+
+
     public Cafeteria(){
         initializeMenu();
+        ActionListener listener = new AddInterestListener();
+        setLayout(new FlowLayout(FlowLayout.RIGHT));
+
+        radio1 = new JRadioButton("Menu and order");
+        radio2 = new JRadioButton("Receipt");
+        buttonGroup = new ButtonGroup();
+        buttonGroup.add(radio1);
+        buttonGroup.add(radio2);
+
+        textArea.append(displayMenu());
+        textArea.append("\n What would you like to order?");
+        textArea.setFont(new Font("monospaced", Font.PLAIN, 12));
+
+        receiptArea.setFont(new Font("monospaced", Font.PLAIN, 12));
+
+        JButton button = new JButton("User Input");
+        button.addActionListener(listener);
+
+        add(radio1);
+        add(radio2);
+        add(button, BorderLayout.EAST);
     }
 
     public String displayMenu(){
         int count = 1;
         final int dashedLines = 100;
-        final int spaces = 25;
+        final int spaces = 15;
         String bars = "";
         LinkedList<String> items = new LinkedList<>();
         LinkedList<Double> price = new LinkedList<>();
@@ -367,8 +416,8 @@ class Cafeteria extends JPanel {
         }
 
         for(int i = 0; i < items.size(); i++){
-            bars += String.format("%25d. %5s", number.get(i), items.get(i));
-            int length = 120 - String.format("%25d. %s", number.get(i), items.get(i)).length();
+            bars += String.format("%10d. %5s", number.get(i), items.get(i));
+            int length = 110 - String.format("%10d. %s", number.get(i), items.get(i)).length();
             bars = periodPad(bars, length);
             bars += String.format("$%.2f%n", price.get(i));
               }
@@ -398,6 +447,40 @@ class Cafeteria extends JPanel {
         return s;
     }
 
+    class AddInterestListener implements ActionListener {
+        public void actionPerformed(ActionEvent event){
+            if(radio1.isSelected()) {
+                String order=
+                        JOptionPane.showInputDialog(null,
+                                textArea, "Menu", JOptionPane.INFORMATION_MESSAGE);
+                orders = sellFood(Integer.parseInt(order));
+                menuCount.put(Integer.parseInt(order), menuCount.get(Integer.parseInt(order)) + 1);
+                isOnReceipt.replace(Integer.parseInt(order), true);
+                lastOrder = menuItems.get(Integer.parseInt(order));
+                student.setWallet(student.getWallet() - orders);
+            }
+            if(radio2.isSelected()){
+                String studentOrders = "";
+                for(HashMap.Entry<Integer, Integer> entry: menuCount.entrySet()){
+                    if(entry.getValue() > 0 && isOnReceipt.get(entry.getKey())) {
+                        studentOrders += entry.getValue() +"x  " + menuItems.get(entry.getKey()) + "\n";
+                    }
+                }
+                receiptArea.setText(studentOrders);
+                JOptionPane.showMessageDialog(null, receiptArea, "Receipt",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }
+
+    public double getOrders(){
+        return orders;
+    }
+
+    public String lastOrder(){
+        return lastOrder;
+    }
+
     public void initializeMenu(){
         menu.put("AppleWood Bacon and Black Olives Pizza", 7.50);
         menu.put("Sliced Genoa Salami and Roasted Garlic Pizza", 7.00);
@@ -411,38 +494,50 @@ class Cafeteria extends JPanel {
         menu.put("Spaghetti and MeatBalls", 6.50);
         menu.put("Avocado Sandwich", 5.50);
         menu.put("Cajun Chicken Benedict", 6.00);
+
+        int count = 1;
+        for(HashMap.Entry<String, Double> entry: menu.entrySet()){
+            menuItems.put(count,entry.getKey());
+            menuCount.put(count, 0);
+            isOnReceipt.put(count, false);
+            count++;
+        }
     }
 
     public String cafeteriaUI(){
         return "Welcome to the Cafeteria!";
     }
 
+    public String menuOptions(){
+        return "1. Menu and Order\n2. Receipt ";
+    }
+
     public double sellFood(int i){
         switch (i){
             case 1:
-                return menu.get("AppleWood Bacon and Black Olives Pizza");
+                return menu.get("Avocado Sandwich");
             case 2:
-                return menu.get("Sliced Genoa Salami and Roasted Garlic Pizza");
+                return menu.get("Cajun Chicken Benedict");
             case 3:
-                return menu.get("New England Clam Chowder");
-            case 4:
-                return menu.get("Pasta Primavera");
-            case 5:
                 return menu.get("Spinach Ravioli with Pesto Sauce");
-            case 6:
-                return menu.get("Pot Pie");
-            case 7:
-                return menu.get("Lasagna");
-            case 8:
-                return menu.get("Pesto Chicken & Bow Tie Pasta with Roasted Squash");
-            case 9:
+            case 4:
                 return menu.get("Chicken Tikka");
+            case 5:
+                return menu.get("Lasagna");
+            case 6:
+                return menu.get("Pesto Chicken & Bow Tie Pasta with Roasted Squash");
+            case 7:
+                return menu.get("Sliced Genoa Salami and Roasted Garlic Pizza");
+            case 8:
+                return menu.get("New England Clam Chowder");
+            case 9:
+                return menu.get("Pasta Primavera");
             case 10:
                 return menu.get("Spaghetti and MeatBalls");
             case 11:
-                return menu.get("Avocado Sandwich");
+                return menu.get("AppleWood Bacon and Black Olives Pizza");
             case 12:
-                return menu.get("Cajun Chicken Benedict");
+                return menu.get("Pot Pie");
 
         }
         return 0;
