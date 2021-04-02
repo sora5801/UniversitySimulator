@@ -14,7 +14,11 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.JMenu;
+
+
 
 /**
  * Project Introduction
@@ -22,7 +26,24 @@ Do you miss going to University Campus? Here is a program that let's you simulat
 *
 */
 
+interface Message {
+    String getName();
+}
+
+class NewNameMessage implements Message {
+    String name;
+
+    public NewNameMessage(String str) {
+        this.name = str;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
 /***
+ * This is the Model Section
  * Student class. This is the class that represents the user, which is presumably a student at SJSU
  */
 class Student extends JComponent {
@@ -60,11 +81,13 @@ class Student extends JComponent {
 }
 
 /**
+ * This is the Controller section
  * Sources
  * For Date: https://www.javatpoint.com/java-get-current-date
  * For BufferedWriter: https://www.baeldung.com/java-write-to-file
  */
 class UniversityCampusFrame extends JFrame {
+    BlockingQueue<Message> queue = new LinkedBlockingQueue<>();;
     private static final int FRAME_WIDTH = 1200;
     private static final int FRAME_HEIGHT = 1000;
     private static final int SCROLL_HEIGHT = 150; //The
@@ -176,26 +199,44 @@ class UniversityCampusFrame extends JFrame {
         class NavigationItemListener implements ActionListener{
             public void actionPerformed(ActionEvent event)
             {
+                //Adding BlockingQueue to this part. Maybe it might work here.
+                try {
+                    Message msg = new NewNameMessage(name);
+                    queue.put(msg);
+                } catch (InterruptedException e) {
+                }
+                Message message = null;
+                try {
+                    message = queue.take();
+                } catch (InterruptedException exception) {
+                    // do nothing
+                }
                 CardLayout cl = (CardLayout) (UniversityCampus.getLayout());
-                if(name == "Campus"){
+                if(message.getName().equals("Campus")){
+                    cafeteria.clearAll(); //Adding the clearAll method is the only way I can think of to clear
+                    //the fields of cafeteria for now 4/2/2021
                     resultArea.append(dtf.format(now) + " You went to the main campus." + "\n");
                     cl.show(UniversityCampus, "campus");
                 }
-                if(name == "Classroom") {
+                if(message.getName().equals("Classroom")) {
+                    cafeteria.clearAll();
                     resultArea.append(dtf.format(now) + " You went to the classroom." + "\n");
                     cl.show(UniversityCampus,"classroom");
                     //student.
                 }
-                if(name == "Cafeteria") {
+                if(message.getName().equals("Cafeteria")) {
+                    cafeteria.clearAll();
                     resultArea.append(dtf.format(now) + " You went to the cafeteria." + "\n");
                     cl.show(UniversityCampus,"cafeteria");
                     cafeteria.getStudent(student);
                 }
-                if(name == "Library") {
+                if(message.getName().equals("Library")) {
+                    cafeteria.clearAll();
                     resultArea.append(dtf.format(now) + " You went to the library." + "\n");
                     cl.show(UniversityCampus,"library");
                 }
-                if(name == "Bookstore") {
+                if(message.getName().equals("Bookstore")) {
+                    cafeteria.clearAll();
                     resultArea.append(dtf.format(now) + " You went to the bookstore." + "\n");
                     cl.show(UniversityCampus,"bookstore");
                 }
@@ -211,20 +252,34 @@ class UniversityCampusFrame extends JFrame {
     public JMenuItem createStatusItem(final String name){
         class StatusItemListener implements ActionListener{
             public void actionPerformed(ActionEvent event){
+                //Adding BlockingQueue to this part. Maybe it might work here.
+                try {
+                    Message msg = new NewNameMessage(name);
+                    queue.put(msg);
+                } catch (InterruptedException e) {
+                }
+                Message message = null;
+                try {
+                    message = queue.take();
+                } catch (InterruptedException exception) {
+                    // do nothing
+                }
+
                 CardLayout cl = (CardLayout) (UniversityCampus.getLayout());
-                if(name == "Name"){
+                assert message != null;
+                if(message.getName().equals("Name")){
                     resultArea.append("Your name is " + student.getName() + "\n");
                 }
-                if(name == "Wallet") {
+                if(message.getName().equals("Wallet")) {
                     resultArea.append("You have $" + student.getWallet() + " in your wallet." + "\n");
                 }
-                if(name == "Homeworks") {
+                if(message.getName().equals("Homeworks")) {
                     resultArea.append(" You went to the cafeteria." + "\n");
                 }
-                if(name == "Books") {
+                if(message.getName().equals("Books")) {
                     resultArea.append(" You went to the library." + "\n");
                 }
-                if(name == "Diary") {
+                if(message.getName().equals("Diary")) {
                     resultArea.append(" You went to the bookstore." + "\n");
                 }
             }
@@ -238,7 +293,18 @@ class UniversityCampusFrame extends JFrame {
     public JMenuItem createFileItem(final String name){
         class FileItemListener implements ActionListener{
             public void actionPerformed(ActionEvent event){
-                if(name == "Save"){
+                try {
+                    Message msg = new NewNameMessage(name);
+                    queue.put(msg);
+                } catch (InterruptedException e) {
+                }
+                Message message = null;
+                try {
+                    message = queue.take();
+                } catch (InterruptedException exception) {
+                    // do nothing
+                }
+                if(message.getName().equals("Save")){
                     try {
                         save(saveFileName);
                     } catch (IOException e) {
@@ -348,6 +414,7 @@ class Cafeteria extends JPanel {
     private JTextField rateField;
     private JTextArea menuOptions;
     private double orders;
+    private double total;
     private JTextArea textArea = new JTextArea();
     private JTextArea receiptArea = new JTextArea();
     private int itemAmount = 0;
@@ -387,6 +454,11 @@ class Cafeteria extends JPanel {
         add(radio1);
         add(radio2);
         add(button, BorderLayout.EAST);
+
+        if(!isVisible()){
+            System.out.println("Gone");
+            clearAll();
+        }
     }
 
     public String displayMenu(){
@@ -457,14 +529,27 @@ class Cafeteria extends JPanel {
                 menuCount.put(Integer.parseInt(order), menuCount.get(Integer.parseInt(order)) + 1);
                 isOnReceipt.replace(Integer.parseInt(order), true);
                 lastOrder = menuItems.get(Integer.parseInt(order));
-                student.setWallet(student.getWallet() - orders);
+                if(student.getWallet() >= orders)
+                    student.setWallet(student.getWallet() - orders);
             }
             if(radio2.isSelected()){
                 String studentOrders = "";
+                total = 0;
                 for(HashMap.Entry<Integer, Integer> entry: menuCount.entrySet()){
                     if(entry.getValue() > 0 && isOnReceipt.get(entry.getKey())) {
-                        studentOrders += entry.getValue() +"x  " + menuItems.get(entry.getKey()) + "\n";
+                        int length = 70 - (entry.getValue() +"x  " + menuItems.get(entry.getKey())).length();
+                        studentOrders += entry.getValue() +"x  " + menuItems.get(entry.getKey());
+                        studentOrders = periodPad(studentOrders, length);
+                        studentOrders += String.format("%.2f", menu.get(menuItems.get(entry.getKey()))
+                                * entry.getValue());
+                        total += menu.get(menuItems.get(entry.getKey())) * entry.getValue();
+                        studentOrders += "\n";
                     }
+                }
+                if(total != 0) {
+                    studentOrders += "Total ";
+                    studentOrders = periodPad(studentOrders, 63);
+                    studentOrders += "$" + String.format("%.2f", total);
                 }
                 receiptArea.setText(studentOrders);
                 JOptionPane.showMessageDialog(null, receiptArea, "Receipt",
@@ -479,6 +564,15 @@ class Cafeteria extends JPanel {
 
     public String lastOrder(){
         return lastOrder;
+    }
+
+    public void clearAll(){
+        this.total = 0;
+        int count = 1;
+        for(HashMap.Entry<String, Double> entry: menu.entrySet()) {
+            menuCount.replace(count, 0);
+            count++;
+        }
     }
 
     public void initializeMenu(){
