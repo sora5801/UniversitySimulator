@@ -404,8 +404,9 @@ class Campus extends JPanel{
  * TODO Draw a frame that depicts the school cafeteria
  */
 class Cafeteria extends JPanel {
-    private static final int AREA_ROWS = 10;
-    private static final int AREA_COLUMNS = 30;
+
+    private static final int rectangleWidth = 250;
+    private static final int rectangleHeight = 150;
     private HashMap<String, Double> menu = new HashMap<>();
     private HashMap<Integer, String> menuItems = new HashMap<>();
     private HashMap<Integer, Integer> menuCount = new HashMap<>();
@@ -424,7 +425,33 @@ class Cafeteria extends JPanel {
     private Student student;
     ButtonGroup buttonGroup;
 
-    public void paintComponent (Graphics g){}
+    public void paintComponent (Graphics g){
+        g.drawString("Bricks Pizza", 760, 245);
+        g.drawRect(750, 175, rectangleWidth, rectangleHeight);
+        g.drawLine(830,175,830,325);
+        g.drawArc(778, 25, 100, 300, 270,90);
+        g.drawLine(880,175,880,325);
+        g.drawString("We make good pizzas", 881, 245);
+
+        g.drawRect(580, 365, rectangleWidth-100, rectangleHeight-100);
+        g.drawLine(630,365,630,415);
+        g.drawString("Food", 590, 395);
+        g.drawLine(670,365,670,415);
+        g.drawString("Menu", 675, 395);
+
+        g.drawRect(510, 440, rectangleWidth, rectangleHeight-100);
+
+        g.drawRect(350, 440, 45, 150);
+
+        g.drawRect(275, 540, 40, 50);
+        g.drawArc(275, 520, 40, 45, 0,180);
+
+        g.drawArc(800, 370, 400, 45, 180,360);
+        g.drawLine(810, 400, 810, 455);
+        g.drawLine(1175, 401, 1175, 459);
+        g.drawArc(800, 427, 400, 45, 180,360);
+
+    }
 
     public void getStudent(Student student){
         this.student = student;
