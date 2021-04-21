@@ -64,18 +64,53 @@ class StudentStatusMessage implements Message{
     }
 }
 
+class NewBookMessage implements Message {
+    HashSet<Book> books;
+
+    public NewBookMessage(HashSet<Book> books) {
+        this.books = books;
+    }
+
+    public HashSet<Book> getNewBooks() {
+        return books;
+   }
+
+    @Override
+    public String getName() {
+        String allnames = "";
+        for(Book b: books){
+            allnames += b.name + " ";
+        }
+        return allnames;
+    }
+}
+
+class NewNameMessage implements Message {
+    String name;
+
+    public NewNameMessage(String str) {
+        this.name = str;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
 /***
  * This is the Model Section
  * Student class. This is the class that represents the user, which is presumably a student at SJSU
  */
-class Student extends JComponent {
+class Student {
     private String name;
     private HashSet<Book> bookLists;
     private double money; //Money to purchase things from the bookstore or cafeteria.
     private LinkedList<String> homework;
     private LinkedList<String> diary; // What the student has done today.
+    private LinkedList<String> foodOrdered; // What food did the student order
 
     public Student(String name){
+        this.foodOrdered = new LinkedList<>();
         this.name = name;
         this.money = 250;
         bookLists = new HashSet<>();
@@ -100,6 +135,7 @@ class Student extends JComponent {
         }
         return bookLists;
     }
+
     public void printBooks(){
         for(Book b: bookLists){
             System.out.println("book: " + b+"\n");
@@ -110,24 +146,84 @@ class Student extends JComponent {
         this.diary.add(diaryEntry);
     }
 
-    public void interactWithCafeteria(Cafeteria cafeteria){
-        while(cafeteria.isDisplayable()){
 
-        }
+    public void addFood(String food){
+        this.foodOrdered.add(food);
     }
 
+    public String getFood(){
+        return foodOrdered.pop();
+    }
 
 
 }
 
+class Book {
+    String name;
+
+    Book(String n) {
+        name = n;
+    }
+}
 /**
- * This is the Controller section
+ * This will be Controller section
+ */
+ class Controller {
+    BlockingQueue<Message> queue;
+    Student studentModel; //The model
+    UniversityCampusFrame view; //The view
+
+    public Controller(BlockingQueue<Message> queue, Student studentModel, UniversityCampusFrame view) {
+        this.queue = queue;
+        this.studentModel = studentModel;
+        this.view = view;
+    }
+
+    public void mainLoop() {
+        while (view.isDisplayable()) {
+            Message message = null;
+            try {
+                message = queue.take();
+            } catch (InterruptedException exception) {
+                // do nothing
+            }
+
+            if(message.getClass() == NewBookMessage.class) {
+                // button updateStudentName was clicked
+                NewBookMessage nameMessage = (NewBookMessage) message;
+                studentModel.addBooks(nameMessage.getNewBooks()); // update model
+                view.checkedOutMessage(studentModel.getName()); // update view
+            }
+
+            else if(message.getClass() == FoodOrderedMessage.class) {
+                FoodOrderedMessage foodMessage = (FoodOrderedMessage) message;
+                studentModel.addFood(foodMessage.getName());
+                view.addOrderedMessage(studentModel.getFood());
+
+            }
+
+             else if(message.getClass() == StudentActionMessage.class){
+                 StudentActionMessage actionMessage = (StudentActionMessage) message;
+                 view.addActionMessage(actionMessage.getName());
+             }
+
+             else if (message.getClass() == StudentStatusMessage.class){
+                 StudentStatusMessage statusMessage = (StudentStatusMessage) message;
+                 view.addOrderedMessage(statusMessage.getName());
+             }
+
+        }
+    }
+}
+
+/**
+ * This is the View section
  * Sources
  * For Date: https://www.javatpoint.com/java-get-current-date
  * For BufferedWriter: https://www.baeldung.com/java-write-to-file
  */
 class UniversityCampusFrame extends JFrame {
-    BlockingQueue<Message> queue = new LinkedBlockingQueue<>();;
+    BlockingQueue<Message> queue;
     private static final int FRAME_WIDTH = 1200;
     private static final int FRAME_HEIGHT = 1000;
     private static final int SCROLL_HEIGHT = 150; //The
@@ -151,8 +247,9 @@ class UniversityCampusFrame extends JFrame {
     /***
      * TODO: add a time and date system. That is, everytime a student goes somewhere, time increaseses
      */
-    public UniversityCampusFrame(){
+    public UniversityCampusFrame(BlockingQueue<Message> queue){
         //JOptionPane.showMessageDialog(null, "Welcome to the University!");
+        this.queue = queue;
         student = new Student("Jane");
 
         card = new CardLayout();
@@ -177,7 +274,7 @@ class UniversityCampusFrame extends JFrame {
         library = new Library(queue);
         classroom = new Classroom();
         bookstore = new BookStore();
-        cafeteria = new Cafeteria();
+        cafeteria = new Cafeteria(queue);
         //cafeteria.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
 
@@ -187,13 +284,6 @@ class UniversityCampusFrame extends JFrame {
         UniversityCampus.add(bookstore, "bookstore");
         UniversityCampus.add(cafeteria, "cafeteria");
 
-
-        //The following are bad practices and Should be elimited, but I need to figure out a way to
-        //To be able to add messages to the JTextArea of UniversityCampusFrame without giving any of the
-        //View classes access to UniversityCampusFram's JTextArea. I hope that it does not involve a massive
-        //reworking of the code. That would be a nightmare (Date logged 04/05/2021)
-        cafeteria.getResultArea(resultArea);
-        cafeteria.getBlockingQueue(queue);
 
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
@@ -205,12 +295,23 @@ class UniversityCampusFrame extends JFrame {
         add(subPanel, BorderLayout.SOUTH);
 
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("University Campus");
+        setVisible(true);
     }
 
-    public void cafeteriaOperation(){
 
+    public void addOrderedMessage(String food){
+        resultArea.append(dtf.format(now) + " You ordered a " + food + "\n");
     }
 
+    public void checkedOutMessage(String book){
+        resultArea.append(dtf.format(now) + " You checked out " + book + "\n");
+    }
+
+    public void addActionMessage(String action){
+        resultArea.append(dtf.format(now) + " You went to the " + action + "." + "\n");
+    }
 
         public JMenu createNavigationMenu()
         {
@@ -247,45 +348,34 @@ class UniversityCampusFrame extends JFrame {
         class NavigationItemListener implements ActionListener{
             public void actionPerformed(ActionEvent event)
             {
-                //Adding BlockingQueue to this part. Maybe it might work here.
                 try {
                     Message msg = new StudentActionMessage(name);
                     queue.put(msg);
                 } catch (InterruptedException e) {
-                }
-                Message message = null;
-                try {
-                    message = queue.take();
-                } catch (InterruptedException exception) {
-                    // do nothing
+                    //do nothing
                 }
                 CardLayout cl = (CardLayout) (UniversityCampus.getLayout());
-                if(message.getName().equals("Campus")){
+                if(name.equals("Campus")){
                     cafeteria.clearAll(); //Adding the clearAll method is the only way I can think of to clear
                     //the fields of cafeteria for now 4/2/2021
-                    resultArea.append(dtf.format(now) + " You went to the main campus." + "\n");
                     cl.show(UniversityCampus, "campus");
                 }
-                if(message.getName().equals("Classroom")) {
+                if(name.equals("Classroom")) {
                     cafeteria.clearAll();
-                    resultArea.append(dtf.format(now) + " You went to the classroom." + "\n");
                     cl.show(UniversityCampus,"classroom");
                     //student.
                 }
-                if(message.getName().equals("Cafeteria")) {
+                if(name.equals("Cafeteria")) {
                     cafeteria.clearAll();
-                    resultArea.append(dtf.format(now) + " You went to the cafeteria." + "\n");
                     cl.show(UniversityCampus,"cafeteria");
                     cafeteria.getStudent(student);
                 }
-                if(message.getName().equals("Library")) {
+                if(name.equals("Library")) {
                     cafeteria.clearAll();
-                    resultArea.append(dtf.format(now) + " You went to the library." + "\n");
                     cl.show(UniversityCampus,"library");
                 }
-                if(message.getName().equals("Bookstore")) {
+                if(name.equals("Bookstore")) {
                     cafeteria.clearAll();
-                    resultArea.append(dtf.format(now) + " You went to the bookstore." + "\n");
                     cl.show(UniversityCampus,"bookstore");
                 }
             }
@@ -306,28 +396,22 @@ class UniversityCampusFrame extends JFrame {
                     queue.put(msg);
                 } catch (InterruptedException e) {
                 }
-                Message message = null;
-                try {
-                    message = queue.take();
-                } catch (InterruptedException exception) {
-                    // do nothing
-                }
 
                 CardLayout cl = (CardLayout) (UniversityCampus.getLayout());
-                assert message != null;
-                if(message.getName().equals("Name")){
+
+                if(name.equals("Name")){
                     resultArea.append("Your name is " + student.getName() + "\n");
                 }
-                if(message.getName().equals("Wallet")) {
+                if(name.equals("Wallet")) {
                     resultArea.append("You have $" + student.getWallet() + " in your wallet." + "\n");
                 }
-                if(message.getName().equals("Homeworks")) {
+                if(name.equals("Homeworks")) {
                     resultArea.append(" You went to the cafeteria." + "\n");
                 }
-                if(message.getName().equals("Books")) {
+                if(name.equals("Books")) {
                     resultArea.append(" You went to the library." + "\n");
                 }
-                if(message.getName().equals("Diary")) {
+                if(name.equals("Diary")) {
                     resultArea.append(" You went to the bookstore." + "\n");
                 }
             }
@@ -389,6 +473,7 @@ class UniversityCampusFrame extends JFrame {
 /***
  * TODO Create an abridged classroom system.
  * OPTIONAL TODO Add a test system based on how well the student did his or her homework.
+ * This is a part of the View Section
  */
 class Classroom extends JPanel {
     private String homework;
@@ -412,6 +497,7 @@ class Classroom extends JPanel {
 /**
  * This is the University Campus Frame
  * TODO Finish drawing a frame that depicts a topdown view of SJSU
+ * This is a part of the View section
  */
 class Campus extends JPanel{
     private final int xCoord = 50; //Centered at 0,0
@@ -450,6 +536,7 @@ class Campus extends JPanel{
 
 /**
  * TODO Draw a frame that depicts the school cafeteria
+ * This is a part of the view section
  * @Author Matthew
  */
 class Cafeteria extends JPanel {
@@ -507,22 +594,11 @@ class Cafeteria extends JPanel {
         this.student = student;
     }
 
-    public void getBlockingQueue(BlockingQueue<Message> blockingQueue){
-        queue = blockingQueue;
-    }
-
-    /**?
-     * This is a bad practice. I am basically giving Cafeteria access to the resultArea of the main campus frame,
-     * which should not happen in MVC model. I need to figure out a way around it or ask if it this is an
-     * acceptable exception (Date logged 4/05/2021)
-     * @param jtextArea
-     */
-    public void getResultArea(JTextArea jtextArea){
-        resultArea = jtextArea;
-    }
 
 
-    public Cafeteria(){
+
+    public Cafeteria(BlockingQueue<Message> queue){
+        this.queue = queue;
         initializeMenu();
         ActionListener listener = new AddInterestListener();
         setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -620,20 +696,16 @@ class Cafeteria extends JPanel {
                 menuCount.put(Integer.parseInt(order), menuCount.get(Integer.parseInt(order)) + 1);
                 isOnReceipt.replace(Integer.parseInt(order), true);
                 lastOrder = menuItems.get(Integer.parseInt(order));
+
                 if(student.getWallet() >= orders)
                     student.setWallet(student.getWallet() - orders);
+
                 try {
                     Message msg = new FoodOrderedMessage(lastOrder);
                     queue.put(msg);
                 } catch (InterruptedException e) {
                 }
-                Message message = null;
-                try {
-                    message = queue.take();
-                } catch (InterruptedException exception) {
-                    // do nothing
-                }
-                resultArea.append("You ordered a " + message.getName() + "\n");
+
             }
             if(radio2.isSelected()){
                 String studentOrders = "";
@@ -741,6 +813,7 @@ class Cafeteria extends JPanel {
 
 
 /**
+ * This is a part of the View Section
  * TODO Draw a frame that depicts the Martin Luther King Jr. Library
  * @Author: Serena
  */
@@ -871,9 +944,6 @@ class Library extends JPanel {
         return collection;
     }
 
-    public void paintComponent (Graphics g){
-
-    }
 
     public void updateBookList(HashSet<Book> bookLists) {
         for(Book b: bookLists){
@@ -914,49 +984,19 @@ class Library extends JPanel {
             return collection;
         }
     }
-}
 
-class Book{
-    String name;
-    Book(String n){
-        name = n;
-    }
+
+
 
     /**
      * A frame of a library will be drawn here
      * @param g
      */
-    public void paintComponent (Graphics g){}
-}
+    public void paintComponent (Graphics g){
 
-class NewBookMessage implements Message {
-    HashSet<Book> books;
-
-    public NewBookMessage(HashSet<Book> books) {
-        this.books = books;
-    }
-
-    public HashSet<Book> getNewBooks() {
-        return books;
-    }
-
-    @Override
-    public String getName() {
-        return null;
     }
 }
 
-class NewNameMessage implements Message {
-    String name;
-
-    public NewNameMessage(String str) {
-        this.name = str;
-    }
-
-    public String getName() {
-        return name;
-    }
-}
 
 /***
  * TODO Draw a frame that depicts the Bookstore
@@ -979,7 +1019,7 @@ class BookStore extends JPanel {
 }
 
 /**
- *
+ *Initialize everything in this area.
  */
 public class UniversitySimulator {
     /**
@@ -987,9 +1027,16 @@ public class UniversitySimulator {
      * @param args
      */
     public static void main(String[] args) {
-        JFrame frame = new UniversityCampusFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setTitle("University Campus");
-        frame.setVisible(true);
+        BlockingQueue<Message> queue = new LinkedBlockingQueue<>();
+
+        Student model = new Student("Name");
+        UniversityCampusFrame campusFrame = new UniversityCampusFrame(queue);
+        Controller controller = new Controller(queue, model, campusFrame);
+
+        controller.mainLoop();
+        //JFrame frame = new UniversityCampusFrame();
+        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+       // frame.setTitle("University Campus");
+       // frame.setVisible(true);
     }
 }
