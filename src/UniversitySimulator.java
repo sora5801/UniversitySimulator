@@ -2,22 +2,20 @@ import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.LocalDate;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.JMenu;
-
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 
 /**
@@ -30,14 +28,38 @@ interface Message {
     String getName();
 }
 
-class NewNameMessage implements Message {
+class StudentActionMessage implements Message {
     String name;
 
-    public NewNameMessage(String str) {
+    public StudentActionMessage(String str) {
         this.name = str;
     }
 
     public String getName() {
+        return name;
+    }
+}
+
+class FoodOrderedMessage implements Message{
+    String name;
+
+    public FoodOrderedMessage(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+class StudentStatusMessage implements Message{
+    String name;
+
+    public StudentStatusMessage(String name) {
+        this.name = name;
+    }
+
+    public String getName(){
         return name;
     }
 }
@@ -48,7 +70,7 @@ class NewNameMessage implements Message {
  */
 class Student extends JComponent {
     private String name;
-    private LinkedList<String> books;
+    private HashSet<Book> bookLists;
     private double money; //Money to purchase things from the bookstore or cafeteria.
     private LinkedList<String> homework;
     private LinkedList<String> diary; // What the student has done today.
@@ -56,6 +78,8 @@ class Student extends JComponent {
     public Student(String name){
         this.name = name;
         this.money = 250;
+        bookLists = new HashSet<>();
+        bookLists.add(new Book("a book"));//serena
     }
 
     public String getName(){ return this.name; }
@@ -64,8 +88,22 @@ class Student extends JComponent {
 
     public void spendMoney(double money){this.money -= money;}
 
-    public void addBooks(String books){
-        this.books.add(books);
+    public void addBooks(HashSet<Book> books){
+        for(Book b: books){
+            bookLists.add(b);
+        }
+    }
+
+    public HashSet<Book> getBookLists(){
+        for(Book b: bookLists){
+            System.out.println("book: " + b+"\n");
+        }
+        return bookLists;
+    }
+    public void printBooks(){
+        for(Book b: bookLists){
+            System.out.println("book: " + b+"\n");
+        }
     }
 
     public void writeDiary(String diaryEntry){
@@ -77,6 +115,8 @@ class Student extends JComponent {
 
         }
     }
+
+
 
 }
 
@@ -134,7 +174,7 @@ class UniversityCampusFrame extends JFrame {
         subPanel.add(scrollPane, BorderLayout.CENTER);
 
         campus = new Campus();
-        library = new Library();
+        library = new Library(queue);
         classroom = new Classroom();
         bookstore = new BookStore();
         cafeteria = new Cafeteria();
@@ -146,6 +186,14 @@ class UniversityCampusFrame extends JFrame {
         UniversityCampus.add(library, "library");
         UniversityCampus.add(bookstore, "bookstore");
         UniversityCampus.add(cafeteria, "cafeteria");
+
+
+        //The following are bad practices and Should be elimited, but I need to figure out a way to
+        //To be able to add messages to the JTextArea of UniversityCampusFrame without giving any of the
+        //View classes access to UniversityCampusFram's JTextArea. I hope that it does not involve a massive
+        //reworking of the code. That would be a nightmare (Date logged 04/05/2021)
+        cafeteria.getResultArea(resultArea);
+        cafeteria.getBlockingQueue(queue);
 
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
@@ -201,7 +249,7 @@ class UniversityCampusFrame extends JFrame {
             {
                 //Adding BlockingQueue to this part. Maybe it might work here.
                 try {
-                    Message msg = new NewNameMessage(name);
+                    Message msg = new StudentActionMessage(name);
                     queue.put(msg);
                 } catch (InterruptedException e) {
                 }
@@ -254,7 +302,7 @@ class UniversityCampusFrame extends JFrame {
             public void actionPerformed(ActionEvent event){
                 //Adding BlockingQueue to this part. Maybe it might work here.
                 try {
-                    Message msg = new NewNameMessage(name);
+                    Message msg = new StudentStatusMessage(name);
                     queue.put(msg);
                 } catch (InterruptedException e) {
                 }
@@ -294,7 +342,7 @@ class UniversityCampusFrame extends JFrame {
         class FileItemListener implements ActionListener{
             public void actionPerformed(ActionEvent event){
                 try {
-                    Message msg = new NewNameMessage(name);
+                    Message msg = new StudentActionMessage(name);
                     queue.put(msg);
                 } catch (InterruptedException e) {
                 }
@@ -402,9 +450,10 @@ class Campus extends JPanel{
 
 /**
  * TODO Draw a frame that depicts the school cafeteria
+ * @Author Matthew
  */
 class Cafeteria extends JPanel {
-
+    private BlockingQueue<Message> queue;
     private static final int rectangleWidth = 250;
     private static final int rectangleHeight = 150;
     private HashMap<String, Double> menu = new HashMap<>();
@@ -418,6 +467,7 @@ class Cafeteria extends JPanel {
     private double total;
     private JTextArea textArea = new JTextArea();
     private JTextArea receiptArea = new JTextArea();
+    private JTextArea resultArea;
     private int itemAmount = 0;
     private JRadioButton radio1;
     private JRadioButton radio2;
@@ -455,6 +505,20 @@ class Cafeteria extends JPanel {
 
     public void getStudent(Student student){
         this.student = student;
+    }
+
+    public void getBlockingQueue(BlockingQueue<Message> blockingQueue){
+        queue = blockingQueue;
+    }
+
+    /**?
+     * This is a bad practice. I am basically giving Cafeteria access to the resultArea of the main campus frame,
+     * which should not happen in MVC model. I need to figure out a way around it or ask if it this is an
+     * acceptable exception (Date logged 4/05/2021)
+     * @param jtextArea
+     */
+    public void getResultArea(JTextArea jtextArea){
+        resultArea = jtextArea;
     }
 
 
@@ -558,6 +622,18 @@ class Cafeteria extends JPanel {
                 lastOrder = menuItems.get(Integer.parseInt(order));
                 if(student.getWallet() >= orders)
                     student.setWallet(student.getWallet() - orders);
+                try {
+                    Message msg = new FoodOrderedMessage(lastOrder);
+                    queue.put(msg);
+                } catch (InterruptedException e) {
+                }
+                Message message = null;
+                try {
+                    message = queue.take();
+                } catch (InterruptedException exception) {
+                    // do nothing
+                }
+                resultArea.append("You ordered a " + message.getName() + "\n");
             }
             if(radio2.isSelected()){
                 String studentOrders = "";
@@ -625,13 +701,6 @@ class Cafeteria extends JPanel {
         }
     }
 
-    public String cafeteriaUI(){
-        return "Welcome to the Cafeteria!";
-    }
-
-    public String menuOptions(){
-        return "1. Menu and Order\n2. Receipt ";
-    }
 
     public double sellFood(int i){
         switch (i){
@@ -669,29 +738,188 @@ class Cafeteria extends JPanel {
     }
 }
 
-class Book{
-    private int k;
-    private String l;
-    Book(int i, String s){
-        k = i;
-        l = s;
-    }
-}
+
 
 /**
  * TODO Draw a frame that depicts the Martin Luther King Jr. Library
+ * @Author: Serena
  */
 class Library extends JPanel {
-    private LinkedList<String> bookLists;
-    //private LinkedList<Book> bookLists = new LinkedList<Book>();
+    //private LinkedList<String> bookLists;
+    BlockingQueue<Message> queue;
+    private HashSet<Book> bookLists = new HashSet<Book>();
+    BookCollection bookCollection;
+    JPanel checkoutPanel = new JPanel();
+    JPanel displayPanel = new JPanel();
+    JLabel bookList;
+    JCheckBox book1, book2, book3, book4, book5, book6;
+    JButton checkOut;
+    JTextArea textArea;
+    Book b1, b2, b3, b4, b5, b6;
 
-    public void displayBookLists(){
+    Library(BlockingQueue<Message> queue){
+        this.queue = queue;
+        add(checkoutPanel,BorderLayout.CENTER);
+        ActionListener listener = new AddInterestListener();
+        bookList =new JLabel("Book list: ");
+        bookList.setBounds(50,50,300,20);
+        book1 =new JCheckBox("Hope Was Here");
+        book1.setBounds(100,100,150,20);
+        b1 = new Book("Hope Was Here");
+
+        book2 =new JCheckBox("Animal Farm");
+        book2.setBounds(100,150,150,20);
+        b2 =new Book("Animal Farm");
+
+        book3 =new JCheckBox("Diary of a Young Girl");
+        book3.setBounds(100,200,150,20);
+        b3 = new Book("Diary of a Young Girl");
+
+        book4 =new JCheckBox("The Shadow of the Wind");
+        book4.setBounds(100,200,150,20);
+        b4 = new Book("The Shadow of the Wind");
+
+        book5 =new JCheckBox("The Lord of the Rings");
+        book5.setBounds(100,200,150,20);
+        b5 = new Book("The Lord of the Rings");
+
+        book6 =new JCheckBox("The Satanic Verses");
+        book6.setBounds(100,200,150,20);
+        b6 = new Book("The Satanic Verses");
+
+        checkOut =new JButton("Check out");
+        checkOut.setBounds(100,250,80,30);
+        checkOut.addActionListener(listener);
+
+
+        checkoutPanel.setLayout(new BoxLayout(checkoutPanel,BoxLayout.Y_AXIS));
+        checkoutPanel.add(bookList);
+        checkoutPanel.add(book1);
+        checkoutPanel.add(book2);
+        checkoutPanel.add(book3);
+        checkoutPanel.add(book4);
+        checkoutPanel.add(book5);
+        checkoutPanel.add(book6);
+        checkoutPanel.add(checkOut);
+        setSize(400,400);
+        //-----------------------
+        textArea = new JTextArea(20, 40);
+        textArea.setText(toString());
+        bookCollection = new BookCollection();
+        displayPanel.add(textArea);
+        JButton refreshButton = new JButton("Refresh");
+        displayPanel.add(refreshButton);//serena
+        add(displayPanel,BorderLayout.EAST);
+        refreshButton.addActionListener(e -> {
+            textArea.setText(toString());
+        });
 
     }
 
-    Library(){
-      //  Book b1 = new Book(100, "s");
-      //  bookLists.add(b1);
+    class AddInterestListener implements ActionListener {
+        public void actionPerformed(ActionEvent event){
+            float amount=0;
+            String message="You just checked out: \n";
+            message+="---------------------\n\n";
+            if(book1.isSelected()){
+                amount++;
+                message+="Hope Was Here\n";
+                bookLists.add(b1);
+            }
+            if(book2.isSelected()){
+                amount++;
+                message+="Animal Farm\n";
+                bookLists.add(b2);
+            }
+            if(book3.isSelected()){
+                amount++;
+                message+="Diary of a Young Girl\n";
+                bookLists.add(b3);
+            }
+            if(book4.isSelected()){
+                amount++;
+                message+="The Shadow of the Wind\n";
+                bookLists.add(b4);
+            }
+            if(book5.isSelected()){
+                amount++;
+                message+="The Lord of the Rings\n";
+                bookLists.add(b5);
+            }
+            if(book6.isSelected()){
+                amount++;
+                message+="The Satanic Verses\n";
+                bookLists.add(b6);
+            }
+            message+="\n---------------------\n";
+            JOptionPane.showMessageDialog(bookList,message+"Total number of books: "+amount);
+            try {
+                Message msg = new NewBookMessage(bookLists);
+                queue.put(msg);
+            } catch (InterruptedException exception) {
+                // do nothing
+            }
+        }
+    }
+
+    public String toString(){
+        String collection = "----Book Collection----\n(refresh to see update)\n\n";
+        for(Book b: bookLists){
+            collection += b.name;
+            collection += "\n";
+        }
+        return collection;
+    }
+
+    public void paintComponent (Graphics g){
+
+    }
+
+    public void updateBookList(HashSet<Book> bookLists) {
+        for(Book b: bookLists){
+            bookCollection.addBooks(b);
+        }
+    }
+
+
+    public class BookCollection
+    {
+        private ArrayList<Book> books;
+        private ArrayList<ChangeListener> listeners;
+
+        public BookCollection()
+        {
+            books = new ArrayList<Book>();
+            listeners = new ArrayList<>();
+        }
+
+        public void addBooks(Book b) {
+            books.add(b);
+            ChangeEvent event = new ChangeEvent(bookCollection);
+            for (ChangeListener listener : listeners)
+                listener.stateChanged(event);
+        }
+
+        public void addChangeListener(ChangeListener listener)
+        {
+            listeners.add(listener);
+        }
+
+        public String toString(){
+            String collection = "----Book Collection----\n";
+            for(Book b: books){
+                collection += b.name;
+                collection += "\n";
+            }
+            return collection;
+        }
+    }
+}
+
+class Book{
+    String name;
+    Book(String n){
+        name = n;
     }
 
     /**
@@ -699,6 +927,35 @@ class Library extends JPanel {
      * @param g
      */
     public void paintComponent (Graphics g){}
+}
+
+class NewBookMessage implements Message {
+    HashSet<Book> books;
+
+    public NewBookMessage(HashSet<Book> books) {
+        this.books = books;
+    }
+
+    public HashSet<Book> getNewBooks() {
+        return books;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+}
+
+class NewNameMessage implements Message {
+    String name;
+
+    public NewNameMessage(String str) {
+        this.name = str;
+    }
+
+    public String getName() {
+        return name;
+    }
 }
 
 /***
