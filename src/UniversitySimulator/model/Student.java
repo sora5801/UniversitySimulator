@@ -1,5 +1,6 @@
 package UniversitySimulator.model;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -10,20 +11,31 @@ public class Student {
     private LinkedList<String> homework;
     private LinkedList<String> diary; // What the student has done today.
     private LinkedList<String> foodOrdered; // What food did the student order
+    private HashMap<String, Double> itemMoney;
+    private CampusStrategy campusStrategy;
+
 
     public Student(String name){
+        this.itemMoney = new HashMap<>();
+        this.campusStrategy = new MainCampusStrategy();
         this.foodOrdered = new LinkedList<>();
         this.name = name;
         this.money = 250;
         bookLists = new HashSet<>();
-        bookLists.add(new Book("a book"));//serena
+    }
+
+    public void setCampusStrategy(CampusStrategy campusStrategy){
+        this.campusStrategy = campusStrategy;
+    }
+
+    public void interactWithBuilding(){
+         campusStrategy.interact(itemMoney, this.money);
+         this.itemMoney = campusStrategy.getItemMoney();
+         this.money = campusStrategy.getMoneyAmount();
     }
 
     public String getName(){ return this.name; }
     public double getWallet(){ return this.money;}
-    public void setWallet(double money){ this.money = money;}
-
-    public void spendMoney(double money){this.money -= money;}
 
     public void addBooks(HashSet<Book> books){
         for(Book b: books){
@@ -31,10 +43,11 @@ public class Student {
         }
     }
 
+    public void returnBooks(){
+        bookLists.clear();
+    }
+
     public HashSet<Book> getBookLists(){
-        for(Book b: bookLists){
-            System.out.println("book: " + b+"\n");
-        }
         return bookLists;
     }
 

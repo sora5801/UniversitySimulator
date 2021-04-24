@@ -28,18 +28,14 @@ public class Cafeteria extends JPanel {
     private HashMap<Integer, Integer> menuCount = new HashMap<>();
     private HashMap<Integer, Boolean> isOnReceipt = new HashMap<>();
     private ArrayList<Integer> receipt = new ArrayList<>();
-    private JTextField rateField;
-    private JTextArea menuOptions;
     private double orders;
     private double total;
     private JTextArea textArea = new JTextArea();
     private JTextArea receiptArea = new JTextArea();
-    private JTextArea resultArea;
     private int itemAmount = 0;
     private JRadioButton radio1;
     private JRadioButton radio2;
     private String lastOrder;
-    private Student student;
     ButtonGroup buttonGroup;
 
     public void paintComponent (Graphics g){
@@ -69,12 +65,6 @@ public class Cafeteria extends JPanel {
         g.drawArc(800, 427, 400, 45, 180,360);
 
     }
-
-    public void getStudent(Student student){
-        this.student = student;
-    }
-
-
 
 
     public Cafeteria(BlockingQueue<Message> queue){
@@ -177,8 +167,6 @@ public class Cafeteria extends JPanel {
                 isOnReceipt.replace(Integer.parseInt(order), true);
                 lastOrder = menuItems.get(Integer.parseInt(order));
 
-                if(student.getWallet() >= orders)
-                    student.setWallet(student.getWallet() - orders);
 
                 try {
                     Message msg = new FoodOrderedMessage(lastOrder);
@@ -285,9 +273,6 @@ public class Cafeteria extends JPanel {
         return 0;
     }
 
-    public String printReceipt(){
-        return "";
-    }
 }
 
 
