@@ -21,10 +21,8 @@ import UniversitySimulator.model.*;
  * @Author: Serena
  */
 public class Library extends JPanel {
-    //private LinkedList<String> bookLists;
     BlockingQueue<Message> queue;
     private HashSet<Book> bookLists = new HashSet<Book>();
-    BookCollection bookCollection;
     JPanel checkoutPanel = new JPanel();
     JPanel displayPanel = new JPanel();
     JLabel bookList;
@@ -32,11 +30,12 @@ public class Library extends JPanel {
     JButton checkOut;
     JTextArea textArea;
     Book b1, b2, b3, b4, b5, b6;
+    String collection;
 
     Library(BlockingQueue<Message> queue){
         this.queue = queue;
         add(checkoutPanel,BorderLayout.CENTER);
-        ActionListener listener = new AddInterestListener();
+        ActionListener listener = new AddBooksListener();
         bookList =new JLabel("Book list: ");
         bookList.setBounds(50,50,300,20);
         book1 =new JCheckBox("Hope Was Here");
@@ -80,19 +79,25 @@ public class Library extends JPanel {
         setSize(400,400);
         //-----------------------
         textArea = new JTextArea(20, 40);
-        textArea.setText(toString());
-        bookCollection = new BookCollection();
+        textArea.setText(displayBook());
         displayPanel.add(textArea);
-        JButton refreshButton = new JButton("Refresh");
-        displayPanel.add(refreshButton);//serena
+        JButton returnButton = new JButton("Return all");
+        displayPanel.add(returnButton);//serena
         add(displayPanel,BorderLayout.EAST);
-        refreshButton.addActionListener(e -> {
-            textArea.setText(toString());
-        });
 
+        returnButton.addActionListener(e -> {
+            bookLists.clear();
+            textArea.setText(displayBook());
+            try {
+                Message msg = new ReturnBookMessage();
+                queue.put(msg);
+            } catch (InterruptedException exception) {
+                // do nothing
+            }
+        });
     }
 
-    class AddInterestListener implements ActionListener {
+    class AddBooksListener implements ActionListener {
         public void actionPerformed(ActionEvent event){
             float amount=0;
             String message="You just checked out: \n";
@@ -135,61 +140,22 @@ public class Library extends JPanel {
             } catch (InterruptedException exception) {
                 // do nothing
             }
+            textArea.setText(displayBook());
         }
     }
 
-    public String toString(){
-        String collection = "----Book Collection----\n(refresh to see update)\n\n";
+    public void updateBookList(HashSet<Book> bookLists) {
+        this.bookLists = bookLists;
+    }
+
+    public String displayBook(){
+        collection = "----Book Collection----\n";
         for(Book b: bookLists){
             collection += b.name;
             collection += "\n";
         }
         return collection;
     }
-
-
-    public void updateBookList(HashSet<Book> bookLists) {
-        for(Book b: bookLists){
-            bookCollection.addBooks(b);
-        }
-    }
-
-
-    public class BookCollection
-    {
-        private ArrayList<Book> books;
-        private ArrayList<ChangeListener> listeners;
-
-        public BookCollection()
-        {
-            books = new ArrayList<Book>();
-            listeners = new ArrayList<>();
-        }
-
-        public void addBooks(Book b) {
-            books.add(b);
-            ChangeEvent event = new ChangeEvent(bookCollection);
-            for (ChangeListener listener : listeners)
-                listener.stateChanged(event);
-        }
-
-        public void addChangeListener(ChangeListener listener)
-        {
-            listeners.add(listener);
-        }
-
-        public String toString(){
-            String collection = "----Book Collection----\n";
-            for(Book b: books){
-                collection += b.name;
-                collection += "\n";
-            }
-            return collection;
-        }
-    }
-
-
-
 
     /**
      * A frame of a library will be drawn here
