@@ -49,6 +49,11 @@ public class Controller {
 
             }
 
+            else if(message.getClass() == FoodErrorMessage.class){
+                FoodErrorMessage foodErrorMessage = (FoodErrorMessage) message;
+                view.addErrorMessage(message.getName());
+            }
+
             else if(message.getClass() == StudentActionMessage.class){
                 StudentActionMessage actionMessage = (StudentActionMessage) message;
                 if(actionMessage.getName().equals("Campus")){
@@ -77,7 +82,11 @@ public class Controller {
                 if(statusMessage.getName().equals("Name")){
                     view.addNameMessage(this.studentModel.getName());
                 }
+                if(statusMessage.getName().equals("Books")){
+                    view.addBooksMessage(studentModel.getBookLists());
+                }
             }
+
 
         }
     }

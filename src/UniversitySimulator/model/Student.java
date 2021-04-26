@@ -18,17 +18,17 @@ public class Student {
 
 
     public Student(String name) {
+        this.itemMoney = new HashMap<>();
+        this.campusStrategy = new MainCampusStrategy();
         this.foodOrdered = new LinkedList<>();
         this.name = name;
         this.money = 250;
         bookLists = new HashSet<>();
-        bookLists.add(new Book("a book"));//serena
 
     }
 
     public String getName(){ return this.name; }
     public double getWallet(){ return this.money;}
-    public void setWallet(double money){ this.money = money;}
 
     private double calculateGpa(Student student) {
         double totalCredits = getTotal(student.credits);
@@ -73,17 +73,6 @@ public class Student {
     public void returnBooks(){
         bookLists.clear();
     }
-
-    public void printBooks(){
-        for(Book b: bookLists){
-            System.out.println("book: " + b+"\n");
-        }
-    }
-
-    public void writeDiary(String diaryEntry){
-        this.diary.add(diaryEntry);
-    }
-
 
     public void addFood(String food){
         this.foodOrdered.add(food);

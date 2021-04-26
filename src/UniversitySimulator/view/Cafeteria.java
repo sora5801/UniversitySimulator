@@ -27,19 +27,14 @@ public class Cafeteria extends JPanel {
     private HashMap<Integer, String> menuItems = new HashMap<>();
     private HashMap<Integer, Integer> menuCount = new HashMap<>();
     private HashMap<Integer, Boolean> isOnReceipt = new HashMap<>();
-    private ArrayList<Integer> receipt = new ArrayList<>();
-    private JTextField rateField;
-    private JTextArea menuOptions;
     private double orders;
     private double total;
     private JTextArea textArea = new JTextArea();
     private JTextArea receiptArea = new JTextArea();
-    private JTextArea resultArea;
     private int itemAmount = 0;
     private JRadioButton radio1;
     private JRadioButton radio2;
     private String lastOrder;
-    private Student student;
     ButtonGroup buttonGroup;
 
     public void paintComponent (Graphics g){
@@ -70,9 +65,6 @@ public class Cafeteria extends JPanel {
 
     }
 
-    public void getStudent(Student student){
-        this.student = student;
-    }
 
 
 
@@ -173,19 +165,25 @@ public class Cafeteria extends JPanel {
                         JOptionPane.showInputDialog(null,
                                 textArea, "Menu", JOptionPane.INFORMATION_MESSAGE);
                 orders = sellFood(Integer.parseInt(order));
-                menuCount.put(Integer.parseInt(order), menuCount.get(Integer.parseInt(order)) + 1);
-                isOnReceipt.replace(Integer.parseInt(order), true);
-                lastOrder = menuItems.get(Integer.parseInt(order));
+                if(!order.equals("") && orders >= 1 && orders <= 12) {
+                    menuCount.put(Integer.parseInt(order), menuCount.get(Integer.parseInt(order)) + 1);
+                    isOnReceipt.replace(Integer.parseInt(order), true);
+                    lastOrder = menuItems.get(Integer.parseInt(order));
 
-                if(student.getWallet() >= orders)
-                    student.setWallet(student.getWallet() - orders);
 
-                try {
-                    Message msg = new FoodOrderedMessage(lastOrder);
-                    queue.put(msg);
-                } catch (InterruptedException e) {
+                    try {
+                        Message msg = new FoodOrderedMessage(lastOrder);
+                        queue.put(msg);
+                    } catch (InterruptedException e) {
+                    }
                 }
-
+                else{
+                    try {
+                        Message msg = new FoodErrorMessage();
+                        queue.put(msg);
+                    } catch (InterruptedException e) {
+                    }
+                }
             }
             if(radio2.isSelected()){
                 String studentOrders = "";
@@ -285,9 +283,6 @@ public class Cafeteria extends JPanel {
         return 0;
     }
 
-    public String printReceipt(){
-        return "";
-    }
 }
 
 
