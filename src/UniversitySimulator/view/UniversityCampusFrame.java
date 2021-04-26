@@ -101,6 +101,10 @@ public class UniversityCampusFrame extends JFrame {
         setVisible(true);
     }
 
+    public Cafeteria getCafeteria(){
+        return this.cafeteria;
+    }
+
 
     public void addOrderedMessage(String food){
         resultArea.append(dtf.format(now) + " You ordered a " + food + "\n");
@@ -124,6 +128,14 @@ public class UniversityCampusFrame extends JFrame {
 
     public void returnBooksMessage(){
         resultArea.append(dtf.format(now) + " You return all the books" + "\n");
+    }
+
+    public void addNameMessage(String name){
+        resultArea.append("Your name is " + name + "\n");
+    }
+
+    public void addWalletMessage(double money){
+        resultArea.append("You have $" + money + " in your wallet." + "\n");
     }
 
 

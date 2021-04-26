@@ -1,9 +1,6 @@
 package UniversitySimulator.model;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class Student {
     private String name;
@@ -16,6 +13,9 @@ public class Student {
     private LinkedList<String> classList; // Student's class list
     private final List<Double> credits = new ArrayList<>();
     private final List<Double> points = new ArrayList<>();
+    private HashMap<String, Double> itemMoney;
+    private CampusStrategy campusStrategy;
+
 
     public Student(String name) {
         this.foodOrdered = new LinkedList<>();
@@ -35,6 +35,16 @@ public class Student {
         double totPts = getTotal(student.points);
         double gpa = totPts / totalCredits;
         return gpa;
+    }
+
+    public void setCampusStrategy(CampusStrategy campusStrategy){
+        this.campusStrategy = campusStrategy;
+    }
+
+    public void interactWithBuilding(){
+        campusStrategy.interact(itemMoney, this.money);
+        this.itemMoney = campusStrategy.getItemMoney();
+        this.money = campusStrategy.getMoneyAmount();
     }
 
     private double getTotal(List<Double> doubles) {
