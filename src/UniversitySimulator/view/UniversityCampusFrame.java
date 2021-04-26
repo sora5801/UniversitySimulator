@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.concurrent.BlockingQueue;
 
 //
@@ -105,15 +106,28 @@ public class UniversityCampusFrame extends JFrame {
         resultArea.append(dtf.format(now) + " You ordered a " + food + "\n");
     }
 
-    public void checkedOutMessage(String book){
-        resultArea.append(dtf.format(now) + " You checked out " + book + "\n");
+
+    public void checkedOutMessage(HashSet<Book> books){
+        String booksName = "";
+        for(Book b: books){
+            booksName +="\"";
+            booksName += b.name;
+            booksName += "\"  ";
+        }
+        resultArea.append(dtf.format(now) + " You checked out " + booksName + "\n");
+        library.updateBookList(books);
     }
 
     public void addActionMessage(String action){
         resultArea.append(dtf.format(now) + " You went to the " + action + "." + "\n");
     }
 
-        public JMenu createNavigationMenu()
+    public void returnBooksMessage(){
+        resultArea.append(dtf.format(now) + " You return all the books" + "\n");
+    }
+
+
+    public JMenu createNavigationMenu()
         {
             JMenu menu = new JMenu("Navigation");
             menu.add(createNavigationItem("Campus"));

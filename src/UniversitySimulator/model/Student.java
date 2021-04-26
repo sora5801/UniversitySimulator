@@ -60,6 +60,10 @@ public class Student {
         return bookLists;
     }
 
+    public void returnBooks(){
+        bookLists.clear();
+    }
+
     public void printBooks(){
         for(Book b: bookLists){
             System.out.println("book: " + b+"\n");

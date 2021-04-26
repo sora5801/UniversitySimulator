@@ -31,10 +31,14 @@ public class Controller {
             }
 
             if(message.getClass() == NewBookMessage.class) {
-                // button updateStudentName was clicked
                 NewBookMessage nameMessage = (NewBookMessage) message;
                 studentModel.addBooks(nameMessage.getNewBooks()); // update model
-                view.checkedOutMessage(studentModel.getName()); // update view
+                view.checkedOutMessage(studentModel.getBookLists()); // update view
+            }
+
+            else if(message.getClass() == ReturnBookMessage.class) {
+                studentModel.returnBooks(); // update model
+                view.returnBooksMessage(); // update view
             }
 
             else if(message.getClass() == FoodOrderedMessage.class) {
