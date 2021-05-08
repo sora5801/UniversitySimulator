@@ -7,27 +7,22 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.BlockingQueue;
 import UniversitySimulator.controller.*;
 import UniversitySimulator.model.*;
 
-//
 
 
 /**
  * This is a part of the View Section
- * TODO Draw a frame that depicts the Martin Luther King Jr. Library
- * @Author: Serena
- */
-/**
- * This is a part of the View Section
- * TODO Draw a frame that depicts the Martin Luther King Jr. Library
- * @Author: Serena
+ * @author: Serena
  */
 public class Library extends JPanel {
     BlockingQueue<Message> queue;
     private HashSet<Book> bookLists = new HashSet<Book>();
+    private HashMap<Book, Boolean> checkedOut = new HashMap<>();
     JPanel checkoutPanel = new JPanel();
     JPanel displayPanel = new JPanel();
     JLabel bookList;
@@ -37,7 +32,7 @@ public class Library extends JPanel {
     Book b1, b2, b3, b4, b5, b6;
     String collection;
 
-    Library(BlockingQueue<Message> queue){
+   public Library(BlockingQueue<Message> queue){
         this.queue = queue;
         add(checkoutPanel,BorderLayout.CENTER);
         ActionListener listener = new AddBooksListener();
@@ -71,6 +66,13 @@ public class Library extends JPanel {
         checkOut.setBounds(100,250,80,30);
         checkOut.addActionListener(listener);
 
+        checkedOut.put(b1, false);
+        checkedOut.put(b2, false);
+        checkedOut.put(b3, false);
+        checkedOut.put(b4, false);
+        checkedOut.put(b5, false);
+        checkedOut.put(b6, false);
+
 
         checkoutPanel.setLayout(new BoxLayout(checkoutPanel,BoxLayout.Y_AXIS));
         checkoutPanel.add(bookList);
@@ -93,6 +95,18 @@ public class Library extends JPanel {
         returnButton.addActionListener(e -> {
             bookLists.clear();
             textArea.setText(displayBook());
+            book1.setEnabled(true);
+            book2.setEnabled(true);
+            book3.setEnabled(true);
+            book4.setEnabled(true);
+            book5.setEnabled(true);
+            book6.setEnabled(true);
+            checkedOut.replace(b1, false);
+            checkedOut.replace(b2, false);
+            checkedOut.replace(b3, false);
+            checkedOut.replace(b4, false);
+            checkedOut.replace(b5, false);
+            checkedOut.replace(b6, false);
             try {
                 Message msg = new ReturnBookMessage();
                 queue.put(msg);
@@ -104,49 +118,81 @@ public class Library extends JPanel {
 
     class AddBooksListener implements ActionListener {
         public void actionPerformed(ActionEvent event){
-            float amount=0;
-            String message="You just checked out: \n";
-            message+="---------------------\n\n";
-            if(book1.isSelected()){
-                amount++;
-                message+="Hope Was Here\n";
-                bookLists.add(b1);
+            if(!book1.isSelected() && !book2.isSelected() && !book3.isSelected() && !book4.isSelected()
+            && !book5.isSelected() && !book6.isSelected()){
+                JOptionPane.showMessageDialog(null, "You did not check out any books");
             }
-            if(book2.isSelected()){
-                amount++;
-                message+="Animal Farm\n";
-                bookLists.add(b2);
+            else {
+                float amount = 0;
+                String message = "You just checked out: \n";
+                message += "---------------------\n\n";
+                if (book1.isSelected()) {
+                    amount++;
+                    message += "Hope Was Here\n";
+                    bookLists.add(b1);
+                    checkedOut.replace(b1, true);
+                    book1.setSelected(false);
+                    book1.setEnabled(false);
+                }
+                if (book2.isSelected()) {
+                    amount++;
+                    message += "Animal Farm\n";
+                    bookLists.add(b2);
+                    checkedOut.replace(b2, true);
+                    book2.setSelected(false);
+                    book2.setEnabled(false);
+                }
+                if (book3.isSelected()) {
+                    amount++;
+                    message += "Diary of a Young Girl\n";
+                    bookLists.add(b3);
+                    checkedOut.replace(b3, true);
+                    book3.setSelected(false);
+                    book3.setEnabled(false);
+                }
+                if (book4.isSelected()) {
+                    amount++;
+                    message += "The Shadow of the Wind\n";
+                    bookLists.add(b4);
+                    checkedOut.replace(b4, true);
+                    book4.setSelected(false);
+                    book4.setEnabled(false);
+                }
+                if (book5.isSelected()) {
+                    amount++;
+                    message += "The Lord of the Rings\n";
+                    bookLists.add(b5);
+                    checkedOut.replace(b5, true);
+                    book5.setSelected(false);
+                    book5.setEnabled(false);
+                }
+                if (book6.isSelected()) {
+                    amount++;
+                    message += "The Satanic Verses\n";
+                    bookLists.add(b6);
+                    checkedOut.replace(b6, true);
+                    book6.setSelected(false);
+                    book6.setEnabled(false);
+                }
+                message += "\n---------------------\n";
+                JOptionPane.showMessageDialog(bookList, message + "Total number of books: " + amount);
+
+                try {
+                    Message msg = new NewBookMessage(checkedOut);
+                    textArea.setText(displayBook());
+                    queue.put(msg);
+                } catch (InterruptedException exception) {
+                    // do nothing
+                }
+
             }
-            if(book3.isSelected()){
-                amount++;
-                message+="Diary of a Young Girl\n";
-                bookLists.add(b3);
-            }
-            if(book4.isSelected()){
-                amount++;
-                message+="The Shadow of the Wind\n";
-                bookLists.add(b4);
-            }
-            if(book5.isSelected()){
-                amount++;
-                message+="The Lord of the Rings\n";
-                bookLists.add(b5);
-            }
-            if(book6.isSelected()){
-                amount++;
-                message+="The Satanic Verses\n";
-                bookLists.add(b6);
-            }
-            message+="\n---------------------\n";
-            JOptionPane.showMessageDialog(bookList,message+"Total number of books: "+amount);
-            try {
-                Message msg = new NewBookMessage(bookLists);
-                queue.put(msg);
-            } catch (InterruptedException exception) {
-                // do nothing
-            }
-            textArea.setText(displayBook());
+
+
         }
+    }
+
+    public HashMap<Book, Boolean> getCheckedOut(){
+        return checkedOut;
     }
 
     public void updateBookList(HashSet<Book> bookLists) {

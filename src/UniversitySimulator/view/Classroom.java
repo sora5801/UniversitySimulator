@@ -9,9 +9,9 @@ import java.util.Map;
 //
 
 /***
- * TODO Create an abridged classroom system.
- * OPTIONAL TODO Add a test system based on how well the student did his or her homework.
- * This is a part of the View Section
+ *
+ * This is the Classroom
+ * @author Dias Mustafin
  */
 public class Classroom extends JPanel {
     private static final int rectangleWidth = 850;

@@ -4,37 +4,76 @@ import UniversitySimulator.view.Classroom;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
+/**
+ * This is the Classroom strategy. This will be called when Student goes to the classroom
+ * @author Matthew Fu, Dias Mustafin
+ */
 public class ClassroomStrategy implements CampusStrategy {
     private double moneyAmount; //This is to try to simulate pass by reference.
     private HashMap<String, Double> itemMoney;
     private double classGpa;
     private String className;
     private String professorName;
+    private HashMap<String, Integer> inventory;
+    private HashSet<Book> booklists;
 
     public ClassroomStrategy() {
         this.className = null;
         this.professorName = null;
     }
 
+    /**This is the interact method. It will be called in the student class.
+     *
+     * @param itemMoney What the student bought
+     * @param money The amount of money the student has
+     * @param inventory The inventory of the student
+     * @param booklists The booklists of the student
+     */
     @Override
-    public void interact(HashMap<String, Double> itemMoney, double money) {
+    public void interact(HashMap<String, Double> itemMoney, double money,
+                         HashMap<String, Integer> inventory, HashSet<Book> booklists) {
         this.moneyAmount = money;
         this.itemMoney = itemMoney;
+        this.inventory = inventory;
+        this.booklists = booklists;
     }
 
+    /**
+     * Get the amount of money
+     * @return double
+     */
     @Override
     public double getMoneyAmount() {
         return this.moneyAmount;
     }
 
+    /**
+     * Get what has been purchased and for how much
+     * @return HashMap
+     */
     @Override
     public HashMap<String, Double> getItemMoney() {
         return this.itemMoney;
+    }
+
+    /**
+     * Get the inventory
+     * @return HashMap
+     */
+    @Override
+    public HashMap<String, Integer> getInventory() {
+        return inventory;
+    }
+
+    /**
+     * Get the list of books
+     * @return HashSet
+     */
+    @Override
+    public HashSet<Book> getBookList() {
+        return booklists;
     }
 
     public class Lecture {

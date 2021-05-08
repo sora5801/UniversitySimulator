@@ -4,20 +4,18 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 
 import UniversitySimulator.controller.*;
-import UniversitySimulator.model.*;
+
 
 //
 
 /**
- * TODO Draw a frame that depicts the school cafeteria
- * This is a part of the view section
- * @Author Matthew
+ * This is the cafeteria. This is where the student may purchase food.
+ * @author Matthew Fu
  */
 public class Cafeteria extends JPanel {
     private BlockingQueue<Message> queue;
@@ -31,12 +29,15 @@ public class Cafeteria extends JPanel {
     private double total;
     private JTextArea textArea = new JTextArea();
     private JTextArea receiptArea = new JTextArea();
-    private int itemAmount = 0;
     private JRadioButton radio1;
     private JRadioButton radio2;
     private String lastOrder;
     ButtonGroup buttonGroup;
 
+    /**
+     * This is the author's attempt to paint what the cafeteria looks like.
+     * @param g
+     */
     public void paintComponent (Graphics g){
         g.drawString("Bricks Pizza", 760, 245);
         g.drawRect(750, 175, rectangleWidth, rectangleHeight);
@@ -66,9 +67,12 @@ public class Cafeteria extends JPanel {
     }
 
 
-
-
-
+    /**
+     * This is the constructor of the class. It takes on a queue to deliver messages to the controller.
+     * It initializes the two radio button for the user to be able to order food and to check the receipt.
+     * When the selects a radio button and input what he wants, a menu will popup, displaying the result.
+     * @param queue the blocking queue
+     */
     public Cafeteria(BlockingQueue<Message> queue){
         this.queue = queue;
         initializeMenu();
@@ -100,6 +104,10 @@ public class Cafeteria extends JPanel {
         }
     }
 
+    /**
+     * This is the menu that is initialized.
+     * @return
+     */
     public String displayMenu(){
         int count = 1;
         final int dashedLines = 100;
@@ -140,24 +148,47 @@ public class Cafeteria extends JPanel {
         return bars;
     }
 
+    /**
+     * Used to pad out period
+     * @param s the string passed in
+     * @param n number of period wanted
+     * @return the new string
+     */
     private String periodPad(String s, int n){
         for (int i = 0; i < n; i++)
             s += ".";
         return s;
     }
 
+    /**
+     * Used to pad out space
+     * @param s the string passed in
+     * @param n number of space wanted
+     * @return the new string
+     */
     private String spacePad(String s, int n){
         for (int i = 0; i < n; i++)
             s += " ";
         return s;
     }
-
+    /**
+     * Used to pad out dash
+     * @param s the string passed in
+     * @param n number of dash wanted
+     * @return the new string
+     */
     private String dashPad(String s, int n){
         for (int i = 0; i < n; i++)
             s += "-";
         return s;
     }
 
+    /**
+     * This class implements the actionlistener to get user inputs.
+     * If the user selects the first radio button, then the menu will pop up and allow the user to buy food.
+     * If the user selects the second radio button, then the receipt will popup, showing what the student has bought
+     * while they were at the cafeteria.
+     */
     class AddInterestListener implements ActionListener {
         public void actionPerformed(ActionEvent event){
             if(radio1.isSelected()) {
@@ -211,14 +242,25 @@ public class Cafeteria extends JPanel {
         }
     }
 
+    /**
+     * Gets the current order.
+     * @return
+     */
     public double getOrders(){
         return orders;
     }
 
+    /**
+     * Gives what is ordered last
+     * @return
+     */
     public String lastOrder(){
         return lastOrder;
     }
 
+    /**
+     * This is used to clear the receipt.
+     */
     public void clearAll(){
         this.total = 0;
         int count = 1;
@@ -228,6 +270,9 @@ public class Cafeteria extends JPanel {
         }
     }
 
+    /**
+     * This is used to initialize the menu of the cafeteria.
+     */
     public void initializeMenu(){
         menu.put("AppleWood Bacon and Black Olives Pizza", 7.50);
         menu.put("Sliced Genoa Salami and Roasted Garlic Pizza", 7.00);
@@ -251,7 +296,11 @@ public class Cafeteria extends JPanel {
         }
     }
 
-
+    /**
+     * This is used to get the item that the user selected.
+     * @param i what the user selected
+     * @return
+     */
     public double sellFood(int i){
         switch (i){
             case 1:

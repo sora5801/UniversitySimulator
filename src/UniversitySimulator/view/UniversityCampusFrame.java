@@ -7,21 +7,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 
 //
 
 /**
- * This is the View section
+ * This is the heart of the view section. This is where all JFrame is displayed. This class contains
+ * an object of all the other classes in view. Here is where a JtextField is at the bottom. Whenever the user
+ * selects something from Navigation dropdown menu, the jpanel changes and a message is added to the bottom
+ * of where the user went. Whenever the user selects something from the status menu, a message is added to the bottom
+ * that displays the status that the user wants.
  * Sources
  * For Date: https://www.javatpoint.com/java-get-current-date
- * For BufferedWriter: https://www.baeldung.com/java-write-to-file
+ * @author Matthew Fu, Shiting Li, Nam Ta, Dias Mustafin.
  */
 public class UniversityCampusFrame extends JFrame {
     BlockingQueue<Message> queue;
@@ -44,7 +47,8 @@ public class UniversityCampusFrame extends JFrame {
     Cafeteria cafeteria;
 
     /***
-     * TODO: add a time and date system. That is, everytime a student goes somewhere, time increaseses
+     * This is the constructor of the class. It takes in a Blocking Queue for the controller class.
+     * This is where the frame is initialized as well as all other jpanels.
      */
     public UniversityCampusFrame(BlockingQueue<Message> queue){
         //JOptionPane.showMessageDialog(null, "Welcome to the University!");
@@ -71,7 +75,7 @@ public class UniversityCampusFrame extends JFrame {
         campus = new Campus();
         library = new Library(queue);
         classroom = new Classroom();
-        bookstore = new BookStore();
+        bookstore = new BookStore(queue);
         cafeteria = new Cafeteria(queue);
         //cafeteria.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
@@ -98,31 +102,80 @@ public class UniversityCampusFrame extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Get the cafeteria object
+     * @return Cafeteria
+     */
     public Cafeteria getCafeteria(){
         return this.cafeteria;
     }
 
+    /**
+     * Get the bookstore object
+     * @return bookstore object
+     */
+    public BookStore getBookStore() {return this.bookstore;}
+
+    /**
+     * Get the Library object
+     * @return library object
+     */
+    public Library getLibrary() {return this.library;}
+
+    /**
+     * Add an error message to the bottom
+     * @param error error message
+     */
     public void addErrorMessage(String error){
         resultArea.append(error + "\n");
     }
 
-
+    /**
+     * Add what food has been ordered to the bottom
+     * @param food food ordered
+     */
     public void addOrderedMessage(String food){
         resultArea.append(dtf.format(now) + " You ordered a " + food + "\n");
     }
 
-
-    public void checkedOutMessage(HashSet<Book> books){
-        String booksName = "";
-        for(Book b: books){
-            booksName +="\"";
-            booksName += b.name;
-            booksName += "\"  ";
+    /**
+     * Add what kind of items has been bought
+     * @param items items bought
+     */
+    public void addItemMessage(LinkedList<String> items) {
+        String names = "";
+        for (String item : items) {
+            names += "\"" + item + "\" ";
         }
-        resultArea.append(dtf.format(now) + " You checked out " + booksName + "\n");
-        library.updateBookList(books);
+        if (names.length() > 0) {
+            resultArea.append(dtf.format(now) + " You bought " + names + "\n");
+        }
     }
 
+    /**
+     * Add what kind of books has been checked out.
+     * @param books books checked out.
+     * @param booklists the student's current book list.
+     */
+    public void checkedOutMessage(HashMap<Book, Boolean> books, HashSet<Book> booklists){
+        if(!books.isEmpty()) {
+            String booksName = "";
+            for (HashMap.Entry<Book, Boolean> entry: books.entrySet()) {
+                if(entry.getValue() && !booklists.contains(entry.getKey())) {
+                    booksName += "\"";
+                    booksName += entry.getKey().getName();
+                    booksName += "\"  ";
+                }
+            }
+            resultArea.append(dtf.format(now) + " You checked out " + booksName + "\n");
+          //  library.updateBookList(books);
+        }
+    }
+
+    /**
+     * Checks the book that the student currently has.
+     * @param books
+     */
     public void addBooksMessage(HashSet<Book> books){
         String booksName = "";
         String textbooks = "";
@@ -135,23 +188,49 @@ public class UniversityCampusFrame extends JFrame {
         resultArea.append("Textbooks: " + textbooks + "\n");
     }
 
+    /**
+     * Add where the student has went.
+     * @param action
+     */
     public void addActionMessage(String action){
         resultArea.append(dtf.format(now) + " You went to the " + action + "." + "\n");
     }
 
+    /**
+     * Sends the message that the student has returned all the books
+     */
     public void returnBooksMessage(){
         resultArea.append(dtf.format(now) + " You return all the books" + "\n");
     }
 
+    /**
+     * Sends the name of the user at the bottom.
+     * @param name
+     */
     public void addNameMessage(String name){
         resultArea.append("Your name is " + name + "\n");
     }
 
+    /**
+     * Tells how much money that the user currently has
+     * @param money
+     */
     public void addWalletMessage(double money){
         resultArea.append("You have $" + money + " in your wallet." + "\n");
     }
 
+    /**
+     * Tells the inventory that the user currently have
+     * @param stuff
+     */
+    public void addInventoryMessage(String stuff){
+        resultArea.append("You have: \n" + stuff + "in your inventory. \n");
+    }
 
+    /**
+     * Constructs the navigation drop down menu
+     * @return
+     */
     public JMenu createNavigationMenu()
         {
             JMenu menu = new JMenu("Navigation");
@@ -163,19 +242,28 @@ public class UniversityCampusFrame extends JFrame {
             return menu;
         }
 
-        public JMenu createStatusMenu()
+    /**
+     * Constructs the status dropdown menu.
+     * @return
+     */
+    public JMenu createStatusMenu()
         {
             JMenu menu = new JMenu("Status");
             menu.add(createStatusItem("Name"));
             menu.add(createStatusItem("Wallet"));
             menu.add(createStatusItem("Homeworks"));
             menu.add(createStatusItem("Books"));
-            menu.add(createStatusItem("Diary"));
+            menu.add(createStatusItem("Inventory"));
             return menu;
         }
 
 
-
+    /**
+     * This is navigation action listener. Whenever the user selects a new location
+     * the frame will change to go to that location
+     * @param name
+     * @return
+     */
     public JMenuItem createNavigationItem(final String name)
     {
         class NavigationItemListener implements ActionListener{
@@ -219,6 +307,12 @@ public class UniversityCampusFrame extends JFrame {
         return item;
     }
 
+    /**
+     * This is the action listener class for the status menu. Whenever the user wants to check on the student's
+     * status, the status is added at the bottom
+     * @param name
+     * @return
+     */
     public JMenuItem createStatusItem(final String name){
         class StatusItemListener implements ActionListener{
             public void actionPerformed(ActionEvent event){

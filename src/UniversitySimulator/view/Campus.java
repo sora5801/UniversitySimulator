@@ -3,30 +3,17 @@ package UniversitySimulator.view;
 import javax.swing.*;
 import java.awt.*;
 
-//
 
 /**
- * This is the University Campus Frame
- * TODO Finish drawing a frame that depicts a topdown view of SJSU
- * This is a part of the View section
+ * This is the University Campus Frame. This depicts the main campus map
+ * @author Matthew Fu
  */
 public class Campus extends JPanel{
-    private final int xCoord = 50; //Centered at 0,0
-    private final int yCoord = 50;
-    private int Width;
-    private int Height;
     private static final int rectangleWidth = 250;
     private static final int rectangleHeight = 150;
-    private JTextArea resultArea;
-    private static final int AREA_ROWS = 10;
-    private static final int AREA_COLUMNS = 30;
-
-    public Campus(){
-
-    }
 
     /***
-     * Draws the entire Frame
+     * Draws the entire Frame of the campus map
      * @param g
      */
     public void paintComponent (Graphics g){
