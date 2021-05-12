@@ -74,7 +74,7 @@ public class UniversityCampusFrame extends JFrame {
 
         campus = new Campus();
         library = new Library(queue);
-        classroom = new Classroom();
+        classroom = new Classroom(queue);
         bookstore = new BookStore(queue);
         cafeteria = new Cafeteria(queue);
         //cafeteria.setLayout(new FlowLayout(FlowLayout.RIGHT));

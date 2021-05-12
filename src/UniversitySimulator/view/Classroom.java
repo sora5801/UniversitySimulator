@@ -1,10 +1,14 @@
 package UniversitySimulator.view;
 
+import UniversitySimulator.controller.Message;
+import UniversitySimulator.controller.SubmitMessage;
+
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.util.concurrent.BlockingQueue;
 
 //
 
@@ -17,24 +21,135 @@ public class Classroom extends JPanel {
     private static final int rectangleWidth = 850;
     private static final int rectangleHeight = 600;
 
-    JPanel classNamesPanel;
-    JButton[] classNames;
+    private BlockingQueue<Message> queue;
 
-    public Classroom() {
-        this.classNamesPanel = new JPanel();
-        this.classNamesPanel.setMaximumSize(new Dimension(200, 400));
-        this.classNamesPanel.setLayout(new BoxLayout(this.classNamesPanel, BoxLayout.Y_AXIS));
-        this.classNames = new JButton[5];
+    private JTabbedPane tabbedPane;
+    private JComponent classPanel1;
+    private JComponent classPanel2;
+    private JComponent classPanel3;
+    private JComponent classPanel4;
 
-        for(int i = 0; i < classNames.length; i++) {
-            this.classNames[i] = new JButton("Class " + i);
-            this.classNamesPanel.add(this.classNames[i]);
-        }
+    public Classroom(BlockingQueue<Message> queue) {
+        super(new GridLayout(1,1 ));
+        this.queue = queue;
 
-        this.add(classNamesPanel);
+        tabbedPane = new JTabbedPane();
+
+        classPanel1 = makeClassPanel("PHILOSOPHY");
+        tabbedPane.addTab("Class 1", classPanel1);
+        tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
+
+        classPanel2 = makeClassPanel("PHYSICS");
+        tabbedPane.addTab("Class 2", classPanel2);
+        tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
+
+        classPanel3 = makeClassPanel("COMPUTER SCIENCE");
+        tabbedPane.addTab("Class 3", classPanel3);
+        tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
+
+        classPanel4 = makeClassPanel("ETHICS");
+        tabbedPane.addTab("Class 4", classPanel4);
+        tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);
+
+        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        this.add(tabbedPane);
         this.setSize(rectangleWidth, rectangleHeight);
         this.setVisible(true);
+    }
 
+    protected JComponent makeClassPanel(String name) {
+        JPanel panel = new JPanel(false);
+        JLabel className = new JLabel(name);
+        className.setFont(new Font("Verdana", Font.PLAIN, 25));
+        className.setPreferredSize(new Dimension(250, 100));
+        className.setVerticalAlignment(JLabel.TOP);
+
+        JTabbedPane classTabbedPane = new JTabbedPane();
+        JComponent assignment = new JPanel();
+        classTabbedPane.addTab("Assignments", assignment);
+        //tabbedPane.setMnemonicAt(4, KeyEvent.VK_5);
+
+        JComponent lecture = new JPanel();
+        classTabbedPane.addTab("Lectures", lecture);
+        //tabbedPane.setMnemonicAt(2, KeyEvent.VK_2);
+
+        JComponent quiz = new JPanel();
+        JComponent test = new JPanel();
+        JComponent grade = new JPanel();
+
+        JButton q = new JButton("quiz");
+
+        q.addActionListener(e -> {
+            Quiz newQuiz = new Quiz(1);
+        });
+
+
+        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        panel.setLayout(new GridLayout(1,1));
+        panel.add(className);
+        panel.add(classTabbedPane);
+        panel.add(q);
+        return panel;
+    }
+
+    public class Quiz extends JFrame implements ActionListener {
+        JLabel question;
+        JRadioButton jRadioButton[] = new JRadioButton[5];
+        ButtonGroup buttonGroup = new ButtonGroup();
+        JButton submit;
+
+        public Quiz(int quizNumber) {
+            //quizName = new JLabel("Quiz " + quizNumber);
+            question = new JLabel();
+            buttonGroup = new ButtonGroup();
+            for(int i = 0; i < 5; i++) {
+                jRadioButton[i] = new JRadioButton();
+                add(jRadioButton[i]);
+                buttonGroup.add(jRadioButton[i]);
+            }
+
+            submit = new JButton("Submit");
+            /*submit.addActionListener(e -> {
+                try {
+                    Message message = new SubmitMessage();
+                    queue.put(message);
+                } catch(InterruptedException exception) {
+
+                }
+            });*/
+            set();
+            //add(submit);
+
+
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setSize(600,800);
+            setVisible(true);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(e.getSource() == submit) {
+
+            }
+        }
+
+        public void set() {
+            JComponent questionPanel1 = new JPanel();
+            question.setText("question 1");
+            questionPanel1.add(question);
+            jRadioButton[0].setText("1");
+            jRadioButton[1].setText("2");
+            jRadioButton[2].setText("3");
+            jRadioButton[3].setText("4");
+
+            for(int i =0; i < 0; i++)
+                questionPanel1.add(jRadioButton[i]);
+
+            question.setBounds(30,40,450,20);
+            for(int i=0,j=0;i<=90;i+=30,j++)
+                jRadioButton[j].setBounds(50,80+i,200,20);
+
+        }
 
     }
 

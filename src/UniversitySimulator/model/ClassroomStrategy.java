@@ -2,6 +2,10 @@ package UniversitySimulator.model;
 
 import UniversitySimulator.view.Classroom;
 
+import javax.accessibility.Accessible;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -95,9 +99,16 @@ public class ClassroomStrategy implements CampusStrategy {
 
     }
 
-    public class Quiz {
+    public class Quiz implements ActionListener {
 
+
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+        }
     }
+
 
     public class ClassGrade {
         private final Map<String, Double> gradeToScore = new HashMap<>();
