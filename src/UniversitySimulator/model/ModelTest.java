@@ -87,7 +87,7 @@ public class ModelTest {
     public void testClassroomStrategy(){
         Student student = new Student("John");
         BlockingQueue<Message> queue = new LinkedBlockingQueue<>();
-        Classroom classroom = new Classroom();
+        Classroom classroom = new Classroom(queue);
         ClassroomStrategy classroomStrategy = new ClassroomStrategy();
 
         student.setCampusStrategy(classroomStrategy);
