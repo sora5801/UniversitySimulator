@@ -13,7 +13,9 @@ import java.util.concurrent.BlockingQueue;
 //
 
 /***
- *
+ * Source for PanelHolder:
+ * https://stackoverflow.com/questions/2510159
+ * /can-i-add-a-component-to-a-specific-grid-cell-when-a-gridlayout-is-used/38800227
  * This is the Classroom
  * @author Dias Mustafin
  */
@@ -28,6 +30,7 @@ public class Classroom extends JPanel {
     private JComponent classPanel2;
     private JComponent classPanel3;
     private JComponent classPanel4;
+
 
     public Classroom(BlockingQueue<Message> queue) {
         super(new GridLayout(1,1 ));
@@ -94,20 +97,37 @@ public class Classroom extends JPanel {
 
     public class Quiz extends JFrame implements ActionListener {
         JLabel question;
-        JRadioButton jRadioButton[] = new JRadioButton[5];
-        ButtonGroup buttonGroup = new ButtonGroup();
+        JRadioButton jRadioButton[] = new JRadioButton[4];
+        ButtonGroup buttonGroup;
         JButton submit;
+        JComponent questionPanel1 = new JPanel();
 
         public Quiz(int quizNumber) {
+            int i2 = 3;
+            int j = 3;
+          //  setLayout(new CardLayout());
+            JPanel quizPagePanel = new JPanel();
+            JPanel[][] panelHolder = new JPanel[i2][j];
+            GridLayout layout = new GridLayout(i2, j);
+            quizPagePanel.setLayout(layout);
+            setLayout(layout);
+
+            for(int m = 0; m < i2; m++) {
+                for(int n = 0; n < j; n++) {
+                    panelHolder[m][n] = new JPanel();
+                    add(panelHolder[m][n]);
+                }
+            }
+            questionPanel1.setLayout(new BoxLayout(questionPanel1, BoxLayout.Y_AXIS));
+           // setLayout(new BorderLayout());
             //quizName = new JLabel("Quiz " + quizNumber);
             question = new JLabel();
             buttonGroup = new ButtonGroup();
-            for(int i = 0; i < 5; i++) {
+            for(int i = 0; i < 4; i++) {
                 jRadioButton[i] = new JRadioButton();
                 add(jRadioButton[i]);
                 buttonGroup.add(jRadioButton[i]);
             }
-
             submit = new JButton("Submit");
             /*submit.addActionListener(e -> {
                 try {
@@ -118,10 +138,11 @@ public class Classroom extends JPanel {
                 }
             });*/
             set();
-            //add(submit);
+            panelHolder[0][1].add(question);
+            panelHolder[1][0].setLayout(new BorderLayout());
+            panelHolder[1][0].add(questionPanel1, BorderLayout.WEST);
+            panelHolder[2][1].add(submit);
 
-
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setSize(600,800);
             setVisible(true);
         }
@@ -134,7 +155,6 @@ public class Classroom extends JPanel {
         }
 
         public void set() {
-            JComponent questionPanel1 = new JPanel();
             question.setText("question 1");
             questionPanel1.add(question);
             jRadioButton[0].setText("1");
@@ -142,10 +162,10 @@ public class Classroom extends JPanel {
             jRadioButton[2].setText("3");
             jRadioButton[3].setText("4");
 
-            for(int i =0; i < 0; i++)
+            for(int i =0; i < 4; i++)
                 questionPanel1.add(jRadioButton[i]);
 
-            question.setBounds(30,40,450,20);
+            question.setBounds(10,40,450,20);
             for(int i=0,j=0;i<=90;i+=30,j++)
                 jRadioButton[j].setBounds(50,80+i,200,20);
 
