@@ -36,7 +36,7 @@ public class Cafeteria extends JPanel {
 
     /**
      * This is the author's attempt to paint what the cafeteria looks like.
-     * @param g
+     * @param g The graphics
      */
     public void paintComponent (Graphics g){
         g.drawString("Bricks Pizza", 760, 245);
@@ -106,7 +106,7 @@ public class Cafeteria extends JPanel {
 
     /**
      * This is the menu that is initialized.
-     * @return
+     * @return the menu
      */
     public String displayMenu(){
         int count = 1;
@@ -244,7 +244,7 @@ public class Cafeteria extends JPanel {
 
     /**
      * Gets the current order.
-     * @return
+     * @return the current order
      */
     public double getOrders(){
         return orders;
@@ -252,7 +252,7 @@ public class Cafeteria extends JPanel {
 
     /**
      * Gives what is ordered last
-     * @return
+     * @return last ordered item
      */
     public String lastOrder(){
         return lastOrder;
@@ -299,7 +299,7 @@ public class Cafeteria extends JPanel {
     /**
      * This is used to get the item that the user selected.
      * @param i what the user selected
-     * @return
+     * @return the price of the food
      */
     public double sellFood(int i){
         switch (i){

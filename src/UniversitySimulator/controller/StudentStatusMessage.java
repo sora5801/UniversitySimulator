@@ -8,7 +8,7 @@ public class StudentStatusMessage implements Message {
 
     /**
      * Construct the class
-     * @param name
+     * @param name name of the message
      */
     public StudentStatusMessage(String name) {
         this.name = name;
@@ -16,7 +16,7 @@ public class StudentStatusMessage implements Message {
 
     /**
      * Get the student's status
-     * @return
+     * @return student status
      */
     public String getName(){
         return name;

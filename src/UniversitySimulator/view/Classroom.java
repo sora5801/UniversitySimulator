@@ -16,7 +16,7 @@ import java.util.concurrent.BlockingQueue;
  * Source for PanelHolder:
  * https://stackoverflow.com/questions/2510159
  * /can-i-add-a-component-to-a-specific-grid-cell-when-a-gridlayout-is-used/38800227
- * This is the Classroom
+ * This is the Classroom class. Here, the student is capable of attending lectures and do quiz assignments
  * @author Dias Mustafin
  */
 public class Classroom extends JPanel {
@@ -31,7 +31,11 @@ public class Classroom extends JPanel {
     private JComponent classPanel3;
     private JComponent classPanel4;
 
-
+    /**
+     * This is the Constructor for the classroom. This initializes all the classes, assignments
+     * and quizzes
+     * @param queue The blocking queue to send messages to controller
+     */
     public Classroom(BlockingQueue<Message> queue) {
         super(new GridLayout(1,1 ));
         this.queue = queue;
@@ -60,6 +64,11 @@ public class Classroom extends JPanel {
         this.setVisible(true);
     }
 
+    /**
+     * This class creates a class panel for the Classroom page.
+     * @param name Name of the class
+     * @return The JComponent of the class panels
+     */
     protected JComponent makeClassPanel(String name) {
         JPanel panel = new JPanel(false);
         JLabel className = new JLabel(name);
@@ -95,6 +104,9 @@ public class Classroom extends JPanel {
         return panel;
     }
 
+    /**
+     * This class creates a Quiz page for each classroom
+     */
     public class Quiz extends JFrame implements ActionListener {
         JLabel question;
         JRadioButton jRadioButton[] = new JRadioButton[4];
@@ -147,6 +159,10 @@ public class Classroom extends JPanel {
             setVisible(true);
         }
 
+        /**
+         * Allows user to submit quizzes to the class.
+         * @param e the action performed
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
             if(e.getSource() == submit) {
@@ -154,6 +170,9 @@ public class Classroom extends JPanel {
             }
         }
 
+        /**
+         * Formats the questions for the quiz
+         */
         public void set() {
             question.setText("question 1");
             questionPanel1.add(question);
@@ -177,7 +196,7 @@ public class Classroom extends JPanel {
 
     /**
      * A frame of a classroom will be drawn here
-     * @param g
+     * @param g the frame
      */
    /* public void paintComponent (Graphics g){
         super.paintComponent(g);

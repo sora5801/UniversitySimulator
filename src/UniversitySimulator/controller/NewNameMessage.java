@@ -8,7 +8,7 @@ public class NewNameMessage implements Message {
 
     /**
      * Constructor
-     * @param str
+     * @param str name of the student
      */
     public NewNameMessage(String str) {
         this.name = str;
@@ -16,7 +16,7 @@ public class NewNameMessage implements Message {
 
     /**
      * Gets the name of the student.
-     * @return
+     * @return name
      */
     public String getName() {
         return name;

@@ -49,6 +49,7 @@ public class UniversityCampusFrame extends JFrame {
     /***
      * This is the constructor of the class. It takes in a Blocking Queue for the controller class.
      * This is where the frame is initialized as well as all other jpanels.
+     * @param queue The queue sent it.
      */
     public UniversityCampusFrame(BlockingQueue<Message> queue){
         //JOptionPane.showMessageDialog(null, "Welcome to the University!");
@@ -104,7 +105,7 @@ public class UniversityCampusFrame extends JFrame {
 
     /**
      * Get the cafeteria object
-     * @return Cafeteria
+     * @return Cafeteria the Cafeteria object
      */
     public Cafeteria getCafeteria(){
         return this.cafeteria;
@@ -174,7 +175,7 @@ public class UniversityCampusFrame extends JFrame {
 
     /**
      * Checks the book that the student currently has.
-     * @param books
+     * @param books the list of books that the student has
      */
     public void addBooksMessage(HashSet<Book> books){
         String booksName = "";
@@ -190,7 +191,7 @@ public class UniversityCampusFrame extends JFrame {
 
     /**
      * Add where the student has went.
-     * @param action
+     * @param action location that the student has went to
      */
     public void addActionMessage(String action){
         resultArea.append(dtf.format(now) + " You went to the " + action + "." + "\n");
@@ -205,7 +206,7 @@ public class UniversityCampusFrame extends JFrame {
 
     /**
      * Sends the name of the user at the bottom.
-     * @param name
+     * @param name name of the user
      */
     public void addNameMessage(String name){
         resultArea.append("Your name is " + name + "\n");
@@ -213,7 +214,7 @@ public class UniversityCampusFrame extends JFrame {
 
     /**
      * Tells how much money that the user currently has
-     * @param money
+     * @param money amount of money in the wallet
      */
     public void addWalletMessage(double money){
         resultArea.append("You have $" + money + " in your wallet." + "\n");
@@ -221,7 +222,7 @@ public class UniversityCampusFrame extends JFrame {
 
     /**
      * Tells the inventory that the user currently have
-     * @param stuff
+     * @param stuff in the inventory
      */
     public void addInventoryMessage(String stuff){
         resultArea.append("You have: \n" + stuff + "in your inventory. \n");
@@ -229,7 +230,7 @@ public class UniversityCampusFrame extends JFrame {
 
     /**
      * Constructs the navigation drop down menu
-     * @return
+     * @return a JMenu
      */
     public JMenu createNavigationMenu()
         {
@@ -244,7 +245,7 @@ public class UniversityCampusFrame extends JFrame {
 
     /**
      * Constructs the status dropdown menu.
-     * @return
+     * @return JMenu
      */
     public JMenu createStatusMenu()
         {
@@ -261,8 +262,8 @@ public class UniversityCampusFrame extends JFrame {
     /**
      * This is navigation action listener. Whenever the user selects a new location
      * the frame will change to go to that location
-     * @param name
-     * @return
+     * @param name the name of the location
+     * @return a JMenuItem
      */
     public JMenuItem createNavigationItem(final String name)
     {
@@ -310,8 +311,8 @@ public class UniversityCampusFrame extends JFrame {
     /**
      * This is the action listener class for the status menu. Whenever the user wants to check on the student's
      * status, the status is added at the bottom
-     * @param name
-     * @return
+     * @param name The name of the status
+     * @return a JMenuItem
      */
     public JMenuItem createStatusItem(final String name){
         class StatusItemListener implements ActionListener{

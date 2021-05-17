@@ -14,7 +14,7 @@ import UniversitySimulator.view.*;
 public class UniversitySimulator {
     /**
      * The main method. This is where the program starts.
-     * @param args
+     * @param args The string arbument
      */
     public static void main(String[] args)  {
         BlockingQueue<Message> queue = new LinkedBlockingQueue<>();

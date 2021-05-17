@@ -23,6 +23,9 @@ public class ClassroomStrategy implements CampusStrategy {
     private HashMap<String, Integer> inventory;
     private HashSet<Book> booklists;
 
+    /**
+     * This is the cosntructor to the Classroom strategy.
+     */
     public ClassroomStrategy() {
         this.className = null;
         this.professorName = null;
@@ -91,18 +94,30 @@ public class ClassroomStrategy implements CampusStrategy {
 
     }
 
+    /**
+     * The strategy for the homework
+     */
     public class Homework {
 
     }
 
+    /**
+     * The strategy for the Test
+     */
     public class Test {
 
     }
 
+    /**
+     * The strategy for the quiz
+     */
     public class Quiz implements ActionListener {
 
 
-
+        /**
+         * The action performed
+         * @param e the action
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
 
@@ -110,12 +125,18 @@ public class ClassroomStrategy implements CampusStrategy {
     }
 
 
+    /**
+     * This is the strategy for the class Grades.
+     */
     public class ClassGrade {
         private final Map<String, Double> gradeToScore = new HashMap<>();
         private ArrayList<Double> hwGrades;
         private ArrayList<Double> testGrades;
         private ArrayList<Double> attendanceGrades;
 
+        /**
+         * Gets the grade in the class.
+         */
         public void classGrade() {
             gradeToScore.put("A+", 4.33);
             gradeToScore.put("A", 4.00);
@@ -132,6 +153,10 @@ public class ClassroomStrategy implements CampusStrategy {
             gradeToScore.put("FX", 0.0);
         }
 
+        /**
+         * Gets the GPA of the student
+         * @return the gpa of the class
+         */
         public double getGpa() {
             double hwTotal = 0;
             double testTotal = 0;

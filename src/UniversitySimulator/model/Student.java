@@ -23,7 +23,7 @@ public class Student {
     /**
      * Construct the student by giving it a name.
      * Initialize the student's wallet inventory, booklists, campusStrategy, and itemMoney list;
-     * @param name
+     * @param name the name of the student
      */
     public Student(String name) {
         this.inventory = new HashMap<>();
@@ -46,6 +46,11 @@ public class Student {
      */
     public double getWallet(){ return this.money;}
 
+    /**
+     * This method calculates the gpa of the student
+     * @param student the student
+     * @return the gpa of the student
+     */
     private double calculateGpa(Student student) {
         double totalCredits = getTotal(student.credits);
         double totPts = getTotal(student.points);
@@ -74,6 +79,11 @@ public class Student {
         this.bookLists = campusStrategy.getBookList();
     }
 
+    /**
+     * The total of the items
+     * @param doubles
+     * @return price total
+     */
     private double getTotal(List<Double> doubles) {
         double total = 0;
         for(Double d:doubles) {
@@ -92,7 +102,7 @@ public class Student {
 
     /**
      * Return all the books on the student
-     * @return
+     *
      */
     public void returnBooks(){
         bookLists.clear();

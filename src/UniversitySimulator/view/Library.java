@@ -17,7 +17,8 @@ import UniversitySimulator.model.*;
 
 /**
  * This is a part of the View Section
- * @author: Serena
+ * This is the library class. The user can check out the library and return library books
+ * @author Serena
  */
 public class Library extends JPanel {
     BlockingQueue<Message> queue;
@@ -32,6 +33,11 @@ public class Library extends JPanel {
     Book b1, b2, b3, b4, b5, b6;
     String collection;
 
+    /**
+     * This is the constructor for the library class. This initializes all the books in the library
+     * as well as all the UI such as the checkout and return buttons.
+     * @param queue The blocking queue passed in
+     */
    public Library(BlockingQueue<Message> queue){
         this.queue = queue;
         add(checkoutPanel,BorderLayout.CENTER);
@@ -116,7 +122,16 @@ public class Library extends JPanel {
         });
     }
 
+    /**
+     * This is the class that gives action to the checkout button.
+     * If there is no book selected, then an error message will pop up
+     * else, it will display a popup showing what has been checked out.
+     */
     class AddBooksListener implements ActionListener {
+        /**
+         * This is how the user checks out items.
+         * @param event the action
+         */
         public void actionPerformed(ActionEvent event){
             if(!book1.isSelected() && !book2.isSelected() && !book3.isSelected() && !book4.isSelected()
             && !book5.isSelected() && !book6.isSelected()){
@@ -191,14 +206,26 @@ public class Library extends JPanel {
         }
     }
 
+    /**
+     * Returns what has been checked out.
+     * @return The HashMap of books and if it has been checked out or not
+     */
     public HashMap<Book, Boolean> getCheckedOut(){
         return checkedOut;
     }
 
+    /**
+     * Updates the booklist
+     * @param bookLists The bookslist
+     */
     public void updateBookList(HashSet<Book> bookLists) {
         this.bookLists = bookLists;
     }
 
+    /**
+     * Displays all the book
+     * @return The collection of books
+     */
     public String displayBook(){
         collection = "----Book Collection----\n";
         for(Book b: bookLists){
@@ -210,7 +237,7 @@ public class Library extends JPanel {
 
     /**
      * A frame of a library will be drawn here
-     * @param g
+     * @param g The graphics component
      */
     public void paintComponent (Graphics g){
 

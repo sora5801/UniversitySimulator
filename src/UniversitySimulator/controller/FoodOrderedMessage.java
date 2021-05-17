@@ -8,7 +8,7 @@ public class FoodOrderedMessage implements Message{
 
         /**
          * Constructs the class with the name of the food.
-         * @param name
+         * @param name name of food
          */
         public FoodOrderedMessage(String name) {
         this.name = name;
@@ -16,7 +16,7 @@ public class FoodOrderedMessage implements Message{
 
         /**
          * Gets the name of the food
-         * @return
+         * @return name of food
          */
         public String getName() {
         return name;

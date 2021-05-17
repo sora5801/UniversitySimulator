@@ -23,6 +23,12 @@ public class BookStore extends JPanel {
     String lastOrder;
 
 
+    /**
+     * This is the constructor to the bookstore. This initializes all the bookstore items
+     * as well as their checkboxes and prices. It also adds the button actions to the
+     * purchase button
+     * @param queue This is the blocking queue that is accepted.
+     */
     public BookStore(BlockingQueue<Message> queue) {
         this.queue = queue;
         setLayout(null);
@@ -82,6 +88,9 @@ public class BookStore extends JPanel {
 
     }
 
+    /**
+     * This method displays the Item purchased by the user and pops up a message.
+     */
     public void clickPurchase() {
         totalPrice = 0;
         int count = 0;
@@ -145,13 +154,25 @@ public class BookStore extends JPanel {
         JOptionPane.showMessageDialog(checkoutButton, message);
     }
 
+    /**
+     * Draws a frame of the bookstore.
+     * @param g the frame
+     */
     public void paintComponent(Graphics g) {
     }
 
+    /**
+     * Gets the total price of the items
+     * @return totalPrice
+     */
     public double getTotalPrice(){
         return totalPrice;
     }
 
+    /**
+     * Gets the list of items bought
+     * @return All the items
+     */
     public LinkedList<String> getItems(){
         return this.Items;
     }

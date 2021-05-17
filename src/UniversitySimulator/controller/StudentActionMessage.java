@@ -8,7 +8,7 @@ public class StudentActionMessage implements Message {
 
     /**
      * Constructs the class
-     * @param str
+     * @param str name of the location
      */
     public StudentActionMessage(String str) {
         this.name = str;
@@ -16,7 +16,7 @@ public class StudentActionMessage implements Message {
 
     /**
      * Gets the name of the location of the student that the student went
-     * @return
+     * @return location
      */
     public String getName() {
         return name;
