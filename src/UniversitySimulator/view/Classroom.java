@@ -1,9 +1,11 @@
 package UniversitySimulator.view;
 
 import UniversitySimulator.controller.Message;
-import UniversitySimulator.controller.SubmitMessage;
+import UniversitySimulator.model.ClassroomStrategy;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,10 +21,9 @@ import java.util.concurrent.BlockingQueue;
  * This is the Classroom class. Here, the student is capable of attending lectures and do quiz assignments
  * @author Dias Mustafin
  */
-public class Classroom extends JPanel {
-    private static final int rectangleWidth = 850;
-    private static final int rectangleHeight = 600;
-
+public class Classroom extends JPanel implements ListSelectionListener {
+    private static final int RECTANGLE_WIDTH = 1200;
+    private static final int RECTANGLE_HEIGHT = 1000;
     private BlockingQueue<Message> queue;
 
     private JTabbedPane tabbedPane;
@@ -30,38 +31,38 @@ public class Classroom extends JPanel {
     private JComponent classPanel2;
     private JComponent classPanel3;
     private JComponent classPanel4;
-
+    private JComponent sectionPanel;
     /**
      * This is the Constructor for the classroom. This initializes all the classes, assignments
      * and quizzes
      * @param queue The blocking queue to send messages to controller
      */
     public Classroom(BlockingQueue<Message> queue) {
-        super(new GridLayout(1,1 ));
+        super(new GridLayout(1,1 )); // sets a layout as a single rectangle(one row and one column)
         this.queue = queue;
 
         tabbedPane = new JTabbedPane();
 
-        classPanel1 = makeClassPanel("PHILOSOPHY");
-        tabbedPane.addTab("Class 1", classPanel1);
+        classPanel1 = makeLecturePanel("PHILOSOPHY");
+        tabbedPane.addTab("Lecture", classPanel1);
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
 
-        classPanel2 = makeClassPanel("PHYSICS");
-        tabbedPane.addTab("Class 2", classPanel2);
+        classPanel2 = makeHWPanel();
+        tabbedPane.addTab("Homework", classPanel2);
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 
-        classPanel3 = makeClassPanel("COMPUTER SCIENCE");
-        tabbedPane.addTab("Class 3", classPanel3);
+        classPanel3 = makeTestPanel();
+        tabbedPane.addTab("Test", classPanel3);
         tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
 
         classPanel4 = makeClassPanel("ETHICS");
-        tabbedPane.addTab("Class 4", classPanel4);
+        tabbedPane.addTab("Grades", classPanel4);
         tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);
 
-        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        //tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT); // no need to add this feature since tabs have enough space
         this.add(tabbedPane);
-        this.setSize(rectangleWidth, rectangleHeight);
-        this.setVisible(true);
+        this.setSize(RECTANGLE_WIDTH, RECTANGLE_HEIGHT);
+        //this.setVisible(true);
     }
 
     /**
@@ -70,44 +71,152 @@ public class Classroom extends JPanel {
      * @return The JComponent of the class panels
      */
     protected JComponent makeClassPanel(String name) {
-        JPanel panel = new JPanel(false);
+        JPanel classPanel = new JPanel(false); //?
         JLabel className = new JLabel(name);
         className.setFont(new Font("Verdana", Font.PLAIN, 25));
-        className.setPreferredSize(new Dimension(250, 100));
-        className.setVerticalAlignment(JLabel.TOP);
+
+        String[] subSections = {"Lectures", "Homework", "Test", "Grades"};
+        JList subSectionsList = new JList(subSections);
+        subSectionsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        subSectionsList.setSelectedIndex(0);
+        //subSectionsList.addListSelectionListener(this::valueChanged);
+
+        JComponent panel = makeHWPanel();
+        //sectionPanel.add(className);
+        sectionPanel = new JPanel();
+
+        //JList panelList = new JList(new ListListModel);
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, subSectionsList, sectionPanel);
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setDividerLocation(100);
+        subSectionsList.setMaximumSize(new Dimension(100, 1000));
+        sectionPanel.setMaximumSize(new Dimension(1100, 1000));
+        splitPane.setPreferredSize(new Dimension(1200,1000));
+
 
         JTabbedPane classTabbedPane = new JTabbedPane();
         JComponent assignment = new JPanel();
         classTabbedPane.addTab("Assignments", assignment);
+        classTabbedPane.setEnabledAt(0, false);
         //tabbedPane.setMnemonicAt(4, KeyEvent.VK_5);
 
-        JComponent lecture = new JPanel();
-        classTabbedPane.addTab("Lectures", lecture);
-        //tabbedPane.setMnemonicAt(2, KeyEvent.VK_2);
-
-        JComponent quiz = new JPanel();
-        JComponent test = new JPanel();
-        JComponent grade = new JPanel();
 
         JButton q = new JButton("quiz");
+        JButton showAssignmentsTab = new JButton("A");
+
+        showAssignmentsTab.addActionListener(e -> {
+            classTabbedPane.setEnabledAt(0, true);
+        });
 
         q.addActionListener(e -> {
-            Quiz newQuiz = new Quiz(1);
+
         });
 
 
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        panel.setLayout(new GridLayout(1,1));
-        panel.add(className);
-        panel.add(classTabbedPane);
-        panel.add(q);
-        return panel;
+        //panel.setLayout(new GridLayout(1,1));
+        //panel.add(classTabbedPane);
+        classPanel.add(splitPane);
+        return classPanel;
+    }
+
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+        int min = lsm.getMinSelectionIndex();
+        int max = lsm.getMaxSelectionIndex();
+
+        for(int i = min; i <= max; i++) {
+            if (lsm.isSelectedIndex(0)) {
+                sectionPanel = makeHWPanel();
+            }
+
+            if (lsm.isSelectedIndex(1)) {
+                //sectionPanel = makeLecturePanel();
+            }
+
+            if (lsm.isSelectedIndex(2)) {
+
+            }
+
+            if (lsm.isSelectedIndex(3)) {
+
+            } else {
+
+            }
+        }
+        //updateSectionPanel((JPanel) subSectionPanels[list.getSelectedIndex()]);
+    }
+
+    protected void updateSectionPanel(JPanel panel) {
+        sectionPanel = new JPanel();
+        sectionPanel.removeAll();
+
+        JLabel label = new JLabel("gdf");
+        sectionPanel.add(label);
+    }
+
+    protected JComponent makeLecturePanel(String name) {
+        JPanel lecturePanel = new JPanel();
+        JLabel className = new JLabel(name);
+        JTextArea lectureMaterial = new JTextArea("Philosophy is the study of general and fundamental questions,\n" +
+                "such as those about reason, existence, knowledge, values, mind, and language. Such questions are often posed as problems to be studied or resolved.\n" +
+                "The term was probably coined by Pythagoras (c. 570 – c. 495 BCE).\n" +
+                "Philosophical methods include questioning, critical discussion, rational argument, and systematic presentation. Historically, philosophy encompassed all bodies of knowledge and a practitioner was known as a philosopher.\n" +
+                "From the time of Ancient Greek philosopher Aristotle to the 19th century, \"natural philosophy\" encompassed astronomy, medicine, and physics.\n" +
+                "For example, Newton's 1687 Mathematical Principles of Natural Philosophy later became classified as a book of physics.\n");
+        lecturePanel.add(className);
+        lecturePanel.add(lectureMaterial);
+        //lectureMaterial.setLayout(new BoxLayout(lecturePanel, BoxLayout.Y_AXIS));
+        return lecturePanel;
+    }
+
+    protected JComponent makeHWPanel() {
+        JPanel hwPanel = new JPanel();
+        JLabel hw1 = new JLabel("Homework 1: Describe one of the works of Aristotle.");
+        JLabel hw2 = new JLabel("Homework 2: How philosophy did become the subject of interest in Ancient Greece?");
+        JLabel hw3 = new JLabel("Homework 3: Essay: The importance of philosophy in modern life(500 words).");
+        JLabel hw4 = new JLabel("Homework 4: The most influential philosopher in your opinion and why?");
+        JLabel hw5 = new JLabel("Homework 5: The difference between ancient philosophy and contemporary.");
+
+        hwPanel.add(hw1);
+        hwPanel.add(hw2);
+        hwPanel.add(hw3);
+        hwPanel.add(hw4);
+        hwPanel.add(hw5);
+
+        hwPanel.setLayout(new BoxLayout(hwPanel, BoxLayout.Y_AXIS));
+        return hwPanel;
+    }
+
+    protected JComponent makeTestPanel() {
+        JPanel testPanel = new JPanel();
+        JLabel question1 = new JLabel("What is philosophy?");
+        /*JRadioButton jRadioButton[] = new JRadioButton[4];
+        jRadioButton[0].setText("Sport");
+        jRadioButton[1].setText("Study of general questions");
+        jRadioButton[2].setText("Video game");
+        jRadioButton[3].setText("IDK)");
+*/
+        JButton submit = new JButton("Submit");
+       // submit.addActionListener(e -> {
+            //if(jRadioButton[1].isSelected())
+
+        //});
+
+        testPanel.add(question1);
+        //for(int i = 0; i < 4; i++)
+          //  testPanel.add(jRadioButton[i]);
+
+        //testPanel.setLayout(new BoxLayout(testPanel, BoxLayout.Y_AXIS));
+        return testPanel;
     }
 
     /**
      * This class creates a Quiz page for each classroom
      */
-    public class Quiz extends JFrame implements ActionListener {
+    /*public class Quiz extends JFrame implements ActionListener {
         JLabel question;
         JRadioButton jRadioButton[] = new JRadioButton[4];
         ButtonGroup buttonGroup;
@@ -141,15 +250,9 @@ public class Classroom extends JPanel {
                 buttonGroup.add(jRadioButton[i]);
             }
             submit = new JButton("Submit");
-            /*submit.addActionListener(e -> {
-                try {
-                    Message message = new SubmitMessage();
-                    queue.put(message);
-                } catch(InterruptedException exception) {
+            submit.addActionListener(e -> {
 
-                }
-            });*/
-            set();
+            });
             panelHolder[0][1].add(question);
             panelHolder[1][0].setLayout(new BorderLayout());
             panelHolder[1][0].add(questionPanel1, BorderLayout.WEST);
@@ -163,32 +266,14 @@ public class Classroom extends JPanel {
          * Allows user to submit quizzes to the class.
          * @param e the action performed
          */
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if(e.getSource() == submit) {
-
-            }
-        }
 
         /**
          * Formats the questions for the quiz
-         */
-        public void set() {
-            question.setText("question 1");
-            questionPanel1.add(question);
-            jRadioButton[0].setText("1");
-            jRadioButton[1].setText("2");
-            jRadioButton[2].setText("3");
-            jRadioButton[3].setText("4");
 
-            for(int i =0; i < 4; i++)
-                questionPanel1.add(jRadioButton[i]);
+    }*/
 
-            question.setBounds(10,40,450,20);
-            for(int i=0,j=0;i<=90;i+=30,j++)
-                jRadioButton[j].setBounds(50,80+i,200,20);
+    public class Grades {
 
-        }
 
     }
 
@@ -205,5 +290,6 @@ public class Classroom extends JPanel {
 
     }*/
 }
+
 
 

@@ -83,24 +83,6 @@ public class ClassroomStrategy implements CampusStrategy {
         return booklists;
     }
 
-    public class Lecture {
-        private String lectureTopic;
-        private String lectureMaterial;
-
-        public Lecture(String lectureTopic, String lectureMaterial) {
-            this.lectureTopic = lectureTopic;
-            this.lectureMaterial = lectureMaterial;
-        }
-
-    }
-
-    /**
-     * The strategy for the homework
-     */
-    public class Homework {
-
-    }
-
     /**
      * The strategy for the Test
      */
@@ -169,7 +151,7 @@ public class ClassroomStrategy implements CampusStrategy {
             for (double i : attendanceGrades)
                 attendanceTotal += i;
 
-            classGpa = 0.6 * testTotal + 0.3 * hwTotal + 0.1 * attendanceTotal; // not done
+            classGpa = 0.6 * testTotal; // not done
 
             return classGpa;
         }
