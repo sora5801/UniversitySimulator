@@ -121,6 +121,10 @@ public class Classroom extends JPanel implements ListSelectionListener {
         return classPanel;
     }
 
+    /**
+     * This is the action class for value changed on the homework.
+     * @param e The action
+     */
     @Override
     public void valueChanged(ListSelectionEvent e) {
         ListSelectionModel lsm = (ListSelectionModel)e.getSource();
@@ -149,6 +153,10 @@ public class Classroom extends JPanel implements ListSelectionListener {
         //updateSectionPanel((JPanel) subSectionPanels[list.getSelectedIndex()]);
     }
 
+    /**
+     * Returns section panel
+     * @param panel The panel returned
+     */
     protected void updateSectionPanel(JPanel panel) {
         sectionPanel = new JPanel();
         sectionPanel.removeAll();
@@ -157,6 +165,11 @@ public class Classroom extends JPanel implements ListSelectionListener {
         sectionPanel.add(label);
     }
 
+    /**
+     * This creates the lecture panel for the philosophy class
+     * @param name the name of the class
+     * @return JComponent for Lecture Panel
+     */
     protected JComponent makeLecturePanel(String name) {
         JPanel lecturePanel = new JPanel();
         JLabel className = new JLabel(name);
@@ -172,6 +185,10 @@ public class Classroom extends JPanel implements ListSelectionListener {
         return lecturePanel;
     }
 
+    /**
+     * This creates a HW Panel for the philosophy class
+     * @return JComponent for homework
+     */
     protected JComponent makeHWPanel() {
         JPanel hwPanel = new JPanel();
         JLabel hw1 = new JLabel("Homework 1: Describe one of the works of Aristotle.");
@@ -190,6 +207,10 @@ public class Classroom extends JPanel implements ListSelectionListener {
         return hwPanel;
     }
 
+    /**
+     * This functions creates a Test Panel for the philosophy panel
+     * @return JComponent for Test Panel
+     */
     protected JComponent makeTestPanel() {
         JPanel testPanel = new JPanel();
         JLabel question1 = new JLabel("What is philosophy?");
