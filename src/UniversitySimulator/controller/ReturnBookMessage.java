@@ -5,6 +5,10 @@ package UniversitySimulator.controller;
  */
 public class ReturnBookMessage implements Message {
 
+    /**
+     * Overriden and returns nothing.
+     * @return nothing
+     */
     @Override
     public String getName() {
         return "";

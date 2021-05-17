@@ -21,7 +21,7 @@ public class CafeteriaStrategy implements CampusStrategy{
 
     /**
      * Construct this class by placing a cafeteria object into the field
-     * @param cafeteria
+     * @param cafeteria the Cafeteria object
      */
     public CafeteriaStrategy(Cafeteria cafeteria){
         this.cafeteria = cafeteria;

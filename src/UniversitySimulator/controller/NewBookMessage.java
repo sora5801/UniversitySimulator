@@ -13,7 +13,7 @@ public class NewBookMessage implements Message {
 
     /**
      * Constructs the message with the books checked out.
-     * @param books
+     * @param books gets the book
      */
     public NewBookMessage(HashMap<Book, Boolean> books) {
         this.books = books;
@@ -21,7 +21,7 @@ public class NewBookMessage implements Message {
 
     /**
      * Get the list of books checked out
-     * @return
+     * @return checked out books
      */
     public HashMap<Book, Boolean> getNewBooks() {
         return books;
@@ -29,7 +29,7 @@ public class NewBookMessage implements Message {
 
     /**
      * not used
-     * @return
+     * @return nothing
      */
     @Override
     public String getName() {

@@ -6,7 +6,7 @@ package UniversitySimulator.controller;
 public class FoodErrorMessage implements Message{
     /**
      * returns the error message.
-     * @return
+     * @return error food
      */
     @Override
     public String getName() {

@@ -14,7 +14,7 @@ public class Campus extends JPanel{
 
     /***
      * Draws the entire Frame of the campus map
-     * @param g
+     * @param g the frame
      */
     public void paintComponent (Graphics g){
         super.paintComponent(g);
